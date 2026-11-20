@@ -1,4 +1,4 @@
-import {randomFromSeed} from './random.js?v=20261121';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121';
 import {pointAt} from './kolam.js?v=20261121';
 export const resolution=256;
 export function cellAt(flour,x,y){
@@ -7,9 +7,18 @@ export function cellAt(flour,x,y){
 }
 export function createFlour(path){
   const random=randomFromSeed(`${path.seed}:flour`),grains=[];
-  for(const dot of path.dots)for(let i=0;i<100;i++){
+  const style=accentsForSeed(path.seed).color?['center','scattered','tips','all'][Math.floor(random()*4)]:'none',dotColors=new Map();
+  for(const dot of path.dots){
+    const pair=[Math.abs(dot.x),Math.abs(dot.y)].sort((a,b)=>a-b),key=pair.join(':');
+    if(!dotColors.has(key)){
+      const selected=style==='all'||(style==='center'&&dot.x===0&&dot.y===0)||(style==='tips'&&Math.abs(dot.x)+Math.abs(dot.y)===(path.size-1)/2)||(style==='scattered'&&random()<.34);
+      dotColors.set(key,selected?(random()<.52?'vermillion':'marigold'):null);
+    }
+    const pigment=dotColors.get(key);
+    for(let i=0;i<100;i++){
     const a=random()*Math.PI*2,r=Math.sqrt(random())*.033;
-    grains.push({x:dot.x+Math.cos(a)*r,y:dot.y+Math.sin(a)*r,radius:.003+random()*.004,shade:random(),distance:-1});
+    grains.push({x:dot.x+Math.cos(a)*r,y:dot.y+Math.sin(a)*r,radius:.003+random()*.004,shade:random(),pigment,distance:-1});
+    }
   }
   const count=Math.ceil(path.length*1500);
   for(let i=0;i<count;i++){

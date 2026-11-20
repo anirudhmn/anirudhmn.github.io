@@ -7,3 +7,10 @@ export function randomFromSeed(seed) {
     return ((t^(t>>>14))>>>0)/4294967296;
   };
 }
+
+export function accentsForSeed(seed) {
+  const random=randomFromSeed(`${seed}:accent-style`);
+  let color=random()<.68,flourish=random()<.58;
+  if(!color&&!flourish)color=true;
+  return {color,flourish};
+}
