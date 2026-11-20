@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#242827">
+        <meta name="description" content="A living rice-flour kolam. Drawn before dawn, shared with small creatures, washed and renewed.">
+        <title>Before Dawn — a living kolam</title>
+        <link rel="stylesheet" href="src/style.css">
+    </head>
+    <body>
+        <main>
+            <canvas aria-label="A single continuous rice-flour kolam, drawn around dots, foraged by ants, then washed and renewed." role="img"></canvas>
+        </main>
+        <details id="menu">
+            <summary>Before Dawn<span aria-hidden="true"> ·</span></summary>
+            <div class="controls">
+                <button id="pause" type="button">Pause</button>
+                <button id="renew" type="button">New Day</button>
+                <button id="share" type="button">Copy link</button>
+                <button id="save" type="button">Save drawing</button>
+                <p id="notice" role="status" aria-live="polite"></p>
+            </div>
+        </details>
+        <script type="module" src="src/main.js"></script>
+    </body>
+</html>
