@@ -1,5 +1,5 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261121';
-import {pointAt} from './kolam.js?v=20261121';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261122';
+import {pointAt} from './kolam.js?v=20261122';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -15,8 +15,8 @@ export function createFlour(path){
       dotColors.set(key,selected?(random()<.52?'vermillion':'marigold'):null);
     }
     const pigment=dotColors.get(key);
-    for(let i=0;i<100;i++){
-    const a=random()*Math.PI*2,r=Math.sqrt(random())*.033;
+    for(let i=0;i<150;i++){
+    const a=random()*Math.PI*2,r=Math.sqrt(random())*.043;
     grains.push({x:dot.x+Math.cos(a)*r,y:dot.y+Math.sin(a)*r,radius:.003+random()*.004,shade:random(),pigment,distance:-1});
     }
   }

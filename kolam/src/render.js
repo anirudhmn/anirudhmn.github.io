@@ -1,5 +1,5 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261121';
-import {resolution} from './flour.js?v=20261121';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261122';
+import {resolution} from './flour.js?v=20261122';
 export function createRenderer(canvas,path){
   const ground=document.createElement('canvas'),powder=document.createElement('canvas'),ornament=document.createElement('canvas');
   const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d'),o=ornament.getContext('2d');
@@ -27,7 +27,7 @@ export function createRenderer(canvas,path){
     drawOrnaments();
   }
   function drawOrnaments(){
-    const random=randomFromSeed(`${path.seed}:rangoli`),vermillion='#c85b43',marigold='#e5b74f',ivory='#eee8d7';
+    const random=randomFromSeed(`${path.seed}:rangoli`),vermillion='#d84a34',marigold='#f0b323',ivory='#eee8d7';
     const {color,flourish:hasFlourish}=accentsForSeed(path.seed);
     const px=(x,y)=>({x:cx+x*scale,y:cy+y*scale});
     function powderDot(x,y,r,color){
@@ -47,23 +47,23 @@ export function createRenderer(canvas,path){
       o.moveTo(0,0);o.bezierCurveTo(s*.08,-s*.5,s*.65,-s*.48,s*.48,-s*.08);o.bezierCurveTo(s*.36,s*.18,s*.05,s*.05,s*.22,-s*.18);
       o.moveTo(-s*.08,-s*.05);o.quadraticCurveTo(-s*.48,-s*.38,-s*.42,-s*.72);o.stroke();o.restore();
     }
-    const reach=(path.size-1)/2+.12,lotus=random()<.55,rotation=random()*Math.PI/2;
+    const reach=(path.size-1)/2+.08,lotus=random()<.55,rotation=0;
     for(let i=0;i<4;i++){
       const a=rotation+i*Math.PI/2,x=Math.cos(a)*reach,y=Math.sin(a)*reach;
       if(color&&lotus){
-        for(let j=-2;j<=2;j++)petal(x,y,a-Math.PI/2+j*.34,.24+random()*.06,.07,j===0?marigold:vermillion);
-        powderDot(x,y,.035,marigold);
+        for(let j=-2;j<=2;j++)petal(x,y,a-Math.PI/2+j*.34,.32+random()*.06,.09,j===0?marigold:vermillion);
+        powderDot(x,y,.052,marigold);
       }else if(color){
-        for(let j=-1;j<=1;j++)powderDot(x+Math.cos(a+Math.PI/2)*j*.105,y+Math.sin(a+Math.PI/2)*j*.105,.032,j===0?marigold:vermillion);
-        petal(x,y,a-Math.PI/2,.22,.06,vermillion);
+        for(let j=-1;j<=1;j++)powderDot(x+Math.cos(a+Math.PI/2)*j*.12,y+Math.sin(a+Math.PI/2)*j*.12,.045,j===0?marigold:vermillion);
+        petal(x,y,a-Math.PI/2,.31,.08,vermillion);
       }
-      if(hasFlourish)flourish(x+Math.cos(a+Math.PI/2)*.08,y+Math.sin(a+Math.PI/2)*.08,a-Math.PI/2,.31,ivory);
+      if(hasFlourish)flourish(x+Math.cos(a+Math.PI/2)*.12,y+Math.sin(a+Math.PI/2)*.12,a-Math.PI/2,.42,ivory);
       if(!color&&i===0)powderDot(x,y,.026,ivory);
     }
   }
   function drawGrain(p){
     if(p.removed)return;
-    f.fillStyle=p.pigment==='vermillion'?(p.shade<.5?'rgba(178,60,43,.66)':'rgba(213,91,59,.82)'):p.pigment==='marigold'?(p.shade<.5?'rgba(193,143,43,.68)':'rgba(232,188,78,.88)'):p.shade<.16?'rgba(175,174,151,.42)':p.shade<.65?'rgba(231,225,202,.70)':'rgba(251,244,220,.83)';
+    f.fillStyle=p.pigment==='vermillion'?(p.shade<.5?'rgba(196,54,37,.88)':'rgba(225,70,48,.96)'):p.pigment==='marigold'?(p.shade<.5?'rgba(208,151,25,.88)':'rgba(244,192,45,.98)'):p.shade<.16?'rgba(175,174,151,.42)':p.shade<.65?'rgba(231,225,202,.70)':'rgba(251,244,220,.83)';
     f.beginPath();f.ellipse(cx+p.x*scale,cy+p.y*scale,Math.max(.24,p.radius*scale),Math.max(.20,p.radius*scale*.72),p.shade*3,0,Math.PI*2);f.fill();
   }
   function redrawRemoved(flour){
