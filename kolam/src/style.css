@@ -38,6 +38,16 @@ canvas { touch-action: none; }
   letter-spacing: .01em;
 }
 
+#menu:not([open]) {
+  width: 48px;
+  border-radius: 50%;
+}
+
+#menu[open] {
+  width: min(270px, calc(100vw - 36px));
+  border-radius: 13px;
+}
+
 summary {
   display: flex;
   align-items: center;
@@ -48,6 +58,20 @@ summary {
   cursor: pointer;
   list-style: none;
   user-select: none;
+}
+
+#menu:not([open]) summary {
+  justify-content: center;
+  padding: 0;
+}
+
+#menu:not([open]) summary > span:not(.menu-mark),
+#menu:not([open]) summary::after {
+  display: none;
+}
+
+#menu[open] summary {
+  padding: 0 16px;
 }
 
 summary::-webkit-details-marker { display: none; }
