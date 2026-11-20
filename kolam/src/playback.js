@@ -1,5 +1,5 @@
-import {createDay,finishDrawing,stepDay} from './day.js?v=20261123';
-import {createRenderer} from './render.js?v=20261123';
+import {createDay,finishDrawing,stepDay} from './day.js?v=20261124';
+import {createRenderer} from './render.js?v=20261124';
 export function mountKolam(canvas,seed,onRenew=()=>{},family){
   let day=createDay(seed,family),render=createRenderer(canvas,day.path);
   const motion=matchMedia('(prefers-reduced-motion: reduce)');

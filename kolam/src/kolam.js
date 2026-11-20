@@ -1,4 +1,4 @@
-import {randomFromSeed} from './random.js?v=20261123';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261124';
 const TAU=Math.PI*2,opening=Math.PI/4-.055;
 
 // X crossing, D uncrossed join, B unjoined loops. This selects a single-strand
@@ -6,6 +6,7 @@ const TAU=Math.PI*2,opening=Math.PI/4-.055;
 export function constructKolam(seed='4',family) {
   const random=randomFromSeed(seed),generated=random()<.5?'diamond':'square';
   const layout=family?.layout||generated;
+  const flourish=accentsForSeed(seed).flourish;
   const generatedSize=layout==='diamond'?(random()<.7?7:9):(random()<.7?5:7);
   const size=family?.size||generatedSize,symmetry=random()<.45?'half-turn':'two-mirrors';
   const radius=.35+random()*.012,dots=[],half=(size-1)/2;
@@ -29,15 +30,15 @@ export function constructKolam(seed='4',family) {
       return {...c,type:types.get(group)};
     });
     if(bonds.filter(b=>b.type==='X').length<candidates.length*.5)continue;
-    const path=assemble(dots,radius,bonds);
+    const path=assemble(dots,radius,bonds,{layout,flourish,size});
     if(path)return {...path,seed:String(seed),size,layout,symmetry,bonds,radius};
   }
   const bonds=candidates.map(c=>({...c,type:c.angle===0||dots[c.a].x===0?'X':'B'}));
-  const path=assemble(dots,radius,bonds);
+  const path=assemble(dots,radius,bonds,{layout,flourish,size});
   if(!path)throw new Error('Could not construct a closed kolam');
   return {...path,seed:String(seed),size,layout,symmetry,bonds,radius};
 }
-function assemble(positions,radius,bonds) {
+function assemble(positions,radius,bonds,design) {
   const dots=positions.map(p=>({...p,cuts:[]})),joins=[],ports=[],edges=[];
   for(const bond of bonds)if(bond.type!=='B'){
     const a={angle:bond.angle,dot:bond.a},b={angle:(bond.angle+Math.PI)%TAU,dot:bond.b};
@@ -55,7 +56,12 @@ function assemble(positions,radius,bonds) {
     for(let i=0;i<dot.cuts.length;i++){
       const start=dot.cuts[i],end=dot.cuts[(i+1)%dot.cuts.length],a=start.angle+opening;
       let b=end.angle-opening;while(b<=a)b+=TAU;
-      const count=Math.ceil((b-a)*28),points=Array.from({length:count+1},(_,j)=>({x:dot.x+radius*Math.cos(a+(b-a)*j/count),y:dot.y+radius*Math.sin(a+(b-a)*j/count)}));
+      const corner=design.flourish==='rounds'&&isCorner(dot,design.layout,(design.size-1)/2),outward=Math.atan2(dot.y,dot.x);
+      const count=Math.ceil((b-a)*28),points=Array.from({length:count+1},(_,j)=>{
+        const angle=a+(b-a)*j/count,delta=Math.atan2(Math.sin(angle-outward),Math.cos(angle-outward));
+        const r=radius+(corner ? .105*Math.pow(Math.max(0,Math.cos(delta)),6) : 0);
+        return {x:dot.x+r*Math.cos(angle),y:dot.y+r*Math.sin(angle)};
+      });
       edge(start.plus,end.minus,points);
     }
   }
@@ -78,6 +84,9 @@ function assemble(positions,radius,bonds) {
   let length=0;points[0].distance=0;
   for(let i=1;i<points.length;i++){length+=Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);points[i].distance=length;}
   return {points,dots:positions,length,edgeCount:edges.length,visitedCount:visited.size};
+}
+function isCorner(dot,layout,half){
+  return layout==='square'?Math.abs(dot.x)===half&&Math.abs(dot.y)===half:Math.abs(dot.x)+Math.abs(dot.y)===half;
 }
 export function pointAt(path,distance){
   const points=path.points;let low=1,high=points.length-1;

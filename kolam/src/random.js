@@ -10,7 +10,8 @@ export function randomFromSeed(seed) {
 
 export function accentsForSeed(seed) {
   const random=randomFromSeed(`${seed}:accent-style`);
-  let color=random()<.68,flourish=random()<.58;
-  if(!color&&!flourish)color=true;
+  let color=random()<.68,hasFlourish=random()<.58;
+  if(!color&&!hasFlourish)color=true;
+  const flourish=hasFlourish?['petals','leaves','rounds'][Math.floor(random()*3)]:null;
   return {color,flourish};
 }

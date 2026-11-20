@@ -1,5 +1,5 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261123';
-import {pointAt} from './kolam.js?v=20261123';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261124';
+import {pointAt} from './kolam.js?v=20261124';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -30,17 +30,18 @@ function addStrokeGrains(grains,points,random,offset){
 }
 export function createFlour(path){
   const random=randomFromSeed(`${path.seed}:flour`),grains=[];
-  const style=accentsForSeed(path.seed).color?['center','scattered','tips','all'][Math.floor(random()*4)]:'none',dotColors=new Map();
+  const {color,flourish}=accentsForSeed(path.seed),style=color?['center','scattered','tips','all'][Math.floor(random()*4)]:'none',dotColors=new Map();
   for(const dot of path.dots){
     const pair=[Math.abs(dot.x),Math.abs(dot.y)].sort((a,b)=>a-b),key=pair.join(':');
     if(!dotColors.has(key)){
-      const selected=style==='all'||(style==='center'&&dot.x===0&&dot.y===0)||(style==='tips'&&Math.abs(dot.x)+Math.abs(dot.y)===(path.size-1)/2)||(style==='scattered'&&random()<.34);
-      dotColors.set(key,selected?(random()<.52?'vermillion':'marigold'):null);
+      const half=(path.size-1)/2,isTip=path.layout==='square'?Math.abs(dot.x)===half&&Math.abs(dot.y)===half:Math.abs(dot.x)+Math.abs(dot.y)===half;
+      const selected=style==='all'||(style==='center'&&dot.x===0&&dot.y===0)||(style==='tips'&&isTip)||(style==='scattered'&&random()<.34);
+      dotColors.set(key,selected);
     }
-    const pigment=dotColors.get(key);
     for(let i=0;i<150;i++){
-    const a=random()*Math.PI*2,r=Math.sqrt(random())*.043;
-    grains.push({x:dot.x+Math.cos(a)*r,y:dot.y+Math.sin(a)*r,radius:.003+random()*.004,shade:random(),pigment,distance:-1});
+      const a=random()*Math.PI*2,r=Math.sqrt(random())*.043,selected=dotColors.get(key);
+      const pigment=selected?(r<.019?'vermillion':'marigold'):null;
+      grains.push({x:dot.x+Math.cos(a)*r,y:dot.y+Math.sin(a)*r,radius:.003+random()*.004,shade:random(),pigment,distance:-1});
     }
   }
   const count=Math.ceil(path.length*1500);
@@ -51,11 +52,14 @@ export function createFlour(path){
     grains.push({x:p.x-Math.sin(a)*scatter+(random()-.5)*.012,y:p.y+Math.cos(a)*scatter+(random()-.5)*.012,radius:(.002+random()*.0045)*flow,shade:random(),distance});
   }
   let drawLength=path.length;
-  if(accentsForSeed(path.seed).flourish){
+  if(flourish==='petals'||flourish==='leaves'){
     const half=(path.size-1)/2;
-    for(let arm=0;arm<4;arm++){
-      const angle=arm*Math.PI/2,x=Math.cos(angle)*half,y=Math.sin(angle)*half;
-      for(const spread of [-.44,0,.44])drawLength=addStrokeGrains(grains,petalStroke(x,y,angle+spread,.30,.075),random,drawLength);
+    const corners=path.layout==='square'?[[-half,-half],[-half,half],[half,-half],[half,half]]:[[0,-half],[-half,0],[half,0],[0,half]];
+    const spreads=flourish==='petals'?[-.43,0,.43]:[-.31,.31];
+    const length=flourish==='petals' ? .34 : .43,width=flourish==='petals' ? .055 : .042;
+    for(const [x,y] of corners){
+      const angle=Math.atan2(y,x),rootX=x+Math.cos(angle)*(path.radius+.055),rootY=y+Math.sin(angle)*(path.radius+.055);
+      for(const spread of spreads)drawLength=addStrokeGrains(grains,petalStroke(rootX,rootY,angle+spread,length,width),random,drawLength);
     }
   }
   return {grains,extent:path.size+1,drawLength,deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
