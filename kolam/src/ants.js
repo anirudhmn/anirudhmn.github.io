@@ -5,15 +5,15 @@ const turn=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 function trailCell(world,x,y){const col=Math.floor((x/world.extent+.5)*trailSize),row=Math.floor((y/world.extent+.5)*trailSize);return col<0||row<0||col>=trailSize||row>=trailSize?-1:row*trailSize+col;}
 export function createAnts(seed,extent){
   const random=randomFromSeed(`${seed}:ants`),nest={x:-extent*.44,y:extent*.26};
-  const ants=Array.from({length:26},(_,i)=>({x:nest.x,y:nest.y,angle:-.55+random()*1.8,mode:'resting',rest:i*.28,payload:[],feeding:0,speed:.8+random()*.35,gait:random()*6.28,wandering:0}));
-  return {ants,nest,extent,random,trail:new Float32Array(trailSize**2),delivered:0,discoveries:0,time:0,retreat:false};
+  const ants=Array.from({length:28},(_,i)=>({x:nest.x,y:nest.y,angle:-.55+random()*1.8,mode:'resting',rest:i*2.15+random()*1.8,payload:[],feeding:0,speed:.68+random()*.22,gait:random()*6.28,wandering:0,scale:.88+random()*.32}));
+  return {ants,nest,extent,random,trail:new Float32Array(trailSize**2),delivered:0,discoveries:0,time:0};
 }
 export function stepAnts(world,flour,dt){
   world.time+=dt;
   const decay=Math.exp(-dt/24);for(let i=0;i<world.trail.length;i++)world.trail[i]*=decay;
   for(const ant of world.ants){
     if(ant.mode==='resting'){
-      ant.rest-=dt;if(ant.rest>0||world.retreat)continue;
+      ant.rest-=dt;if(ant.rest>0)continue;
       ant.mode='searching';ant.angle=-.55+(world.random()-.5)*1.9;
     }
     if(ant.mode==='feeding'){

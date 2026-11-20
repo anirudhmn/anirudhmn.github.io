@@ -22,6 +22,14 @@ nav {
     margin-bottom: 56px;
 }
 
+nav .kolam-link {
+    padding: 1px 10px;
+    border: 1px solid #b8c6b8;
+    border-radius: 999px;
+    color: #294d3a;
+    text-decoration: none;
+}
+
 a {
     color: #246446;
     text-underline-offset: 4px;

@@ -3,22 +3,27 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#242827">
-        <meta name="description" content="A living rice-flour kolam. Drawn before dawn, shared with small creatures, washed and renewed.">
-        <title>Before Dawn — a living kolam</title>
+        <meta name="theme-color" content="#171c1a">
+        <meta name="description" content="A quiet, living rice-flour kolam, drawn around dots and discovered by ants.">
+        <title>Kolam</title>
         <link rel="stylesheet" href="src/style.css">
     </head>
     <body>
         <main>
-            <canvas aria-label="A single continuous rice-flour kolam, drawn around dots, foraged by ants, then washed and renewed." role="img"></canvas>
+            <canvas aria-label="A rice-flour kolam drawing itself around a field of dots, then explored by ants." role="img"></canvas>
         </main>
         <details id="menu">
-            <summary>Before Dawn<span aria-hidden="true"> ·</span></summary>
+            <summary aria-label="Open seed choices"><span aria-hidden="true" class="menu-mark">✳</span><span>Seed</span></summary>
             <div class="controls">
-                <button id="pause" type="button">Pause</button>
-                <button id="renew" type="button">New Day</button>
-                <button id="share" type="button">Copy link</button>
-                <button id="save" type="button">Save drawing</button>
+                <button id="today" type="button">Today’s kolam</button>
+                <button id="random" type="button">Another pattern</button>
+                <form id="seed-form">
+                    <label for="seed-input">Choose a seed</label>
+                    <div class="seed-entry">
+                        <input id="seed-input" name="seed" type="text" maxlength="200" autocomplete="off" placeholder="Type anything">
+                        <button class="grow" type="submit" aria-label="Draw this seed">↗</button>
+                    </div>
+                </form>
                 <p id="notice" role="status" aria-live="polite"></p>
             </div>
         </details>

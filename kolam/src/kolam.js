@@ -87,5 +87,5 @@ export function pointAt(path,distance){
 }
 export function svgFor(path){
   const edge=path.size/2+.4,d=path.points.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(4)} ${p.y.toFixed(4)}`).join(' ')+'Z';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-edge} ${-edge} ${edge*2} ${edge*2}"><title>Before Dawn — seed ${path.seed.replace(/[<>&"']/g,'')}</title><rect x="${-edge}" y="${-edge}" width="${edge*2}" height="${edge*2}" fill="#242827"/><g fill="#eee8d7">${path.dots.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="0.025"/>`).join('')}</g><path d="${d}" fill="none" stroke="#eee8d7" stroke-width="0.017" stroke-linejoin="round"/></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-edge} ${-edge} ${edge*2} ${edge*2}"><title>Kolam — seed ${path.seed.replace(/[<>&"']/g,'')}</title><rect x="${-edge}" y="${-edge}" width="${edge*2}" height="${edge*2}" fill="#171c1a"/><g fill="#eee8d7">${path.dots.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="0.025"/>`).join('')}</g><path d="${d}" fill="none" stroke="#eee8d7" stroke-width="0.017" stroke-linejoin="round"/></svg>`;
 }

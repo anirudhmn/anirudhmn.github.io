@@ -1,25 +1,55 @@
 import {mountKolam} from './playback.js';
-import {svgFor} from './kolam.js';
-const canvas=document.querySelector('canvas'),menu=document.querySelector('#menu'),pause=document.querySelector('#pause'),notice=document.querySelector('#notice');
-const motion=matchMedia('(prefers-reduced-motion: reduce)');let work;
-function readSeed(){const raw=location.hash.slice(1);const query=raw.includes('&')?raw.slice(raw.indexOf('&')+1):raw;return new URLSearchParams(query).get('seed')?.slice(0,200)||'4';}
-function urlFor(seed,path){return `#before-dawn&seed=${encodeURIComponent(seed)}`+(path?`&layout=${path.layout}&size=${path.size}`:'');}
-function readFamily(){const params=new URLSearchParams(location.hash.slice(1).split('&').slice(1).join('&')),layout=params.get('layout'),size=Number(params.get('size'));return (layout==='diamond'&&[7,9].includes(size))||(layout==='square'&&[5,7].includes(size))?{layout,size}:undefined;}
-function label(){pause.textContent=work.paused?'Resume':'Pause';}
-function mount(){work?.dispose();work=mountKolam(canvas,readSeed(),day=>history.replaceState(null,'',urlFor(day.seed,day.path)),readFamily());menu.open=false;notice.textContent='';label();}
-pause.addEventListener('click',()=>{work.setPaused(!work.paused);label();});
-document.querySelector('#renew').addEventListener('click',()=>{
-  const bytes=crypto.getRandomValues(new Uint32Array(2)),seed=[...bytes].map(n=>n.toString(36)).join('-');
-  work.renew(seed);history.pushState(null,'',urlFor(seed));menu.open=false;notice.textContent='';
+
+const canvas=document.querySelector('canvas');
+const menu=document.querySelector('#menu');
+const seedInput=document.querySelector('#seed-input');
+const notice=document.querySelector('#notice');
+let work;
+
+function dailySeed(date=new Date()){
+  const year=date.getFullYear();
+  const month=String(date.getMonth()+1).padStart(2,'0');
+  const day=String(date.getDate()).padStart(2,'0');
+  return `kolam-${year}-${month}-${day}`;
+}
+
+function readSeed(){
+  const hash=location.hash.slice(1);
+  const params=new URLSearchParams(hash.includes('&')?hash.slice(hash.indexOf('&')+1):hash);
+  return params.get('seed')?.slice(0,200)||null;
+}
+
+function seedUrl(seed){return `${location.pathname}${location.search}#seed=${encodeURIComponent(seed)}`;}
+
+function mount(seed=readSeed()||dailySeed()){
+  work?.dispose();
+  work=mountKolam(canvas,seed);
+  menu.open=false;
+  notice.textContent='';
+}
+
+function useSeed(seed,shareable=true){
+  const clean=String(seed).trim().slice(0,200);
+  if(!clean){notice.textContent='Enter a seed to grow its kolam.';seedInput.focus();return;}
+  work.renew(clean);
+  history.pushState(null,'',shareable?seedUrl(clean):`${location.pathname}${location.search}`);
+  menu.open=false;
+  notice.textContent='';
+}
+
+document.querySelector('#today').addEventListener('click',()=>useSeed(dailySeed(),false));
+document.querySelector('#random').addEventListener('click',()=>{
+  const bytes=crypto.getRandomValues(new Uint32Array(3));
+  useSeed([...bytes].map(value=>value.toString(36)).join('-'));
 });
-document.querySelector('#share').addEventListener('click',async()=>{
-  try{const url=new URL(location.href);const day=work.day;url.hash=day.nextSeed?urlFor(day.nextSeed,day.manual?undefined:day.path):urlFor(day.seed,day.path);await navigator.clipboard.writeText(url.href);notice.textContent='Link copied.';}
-  catch{notice.textContent='Copy the address from your browser to share this day.';}
+document.querySelector('#seed-form').addEventListener('submit',event=>{
+  event.preventDefault();
+  useSeed(seedInput.value);
 });
-document.querySelector('#save').addEventListener('click',()=>{
-  const path=work.day.path,url=URL.createObjectURL(new Blob([svgFor(path)],{type:'image/svg+xml'}));
-  const a=document.createElement('a');a.href=url;a.download=`before-dawn-${path.seed.replace(/[^a-zA-Z0-9-]/g,'-')}.svg`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notice.textContent='Saved the complete line drawing.';
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&menu.open){menu.open=false;menu.querySelector('summary').focus();}
 });
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menu.open){menu.open=false;menu.querySelector('summary').focus();}});
-motion.addEventListener('change',()=>queueMicrotask(label));window.addEventListener('hashchange',mount);
-window.addEventListener('pagehide',()=>work.dispose());window.addEventListener('pageshow',event=>{if(event.persisted)mount();});mount();
+window.addEventListener('hashchange',()=>mount());
+window.addEventListener('pagehide',()=>work?.dispose());
+window.addEventListener('pageshow',event=>{if(event.persisted)mount();});
+mount();

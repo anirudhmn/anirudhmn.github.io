@@ -1,4 +1,4 @@
-import {createDay,finishDrawing,beginWashing,stepDay} from './day.js';
+import {createDay,finishDrawing,stepDay} from './day.js';
 import {createRenderer} from './render.js';
 export function mountKolam(canvas,seed,onRenew=()=>{},family){
   let day=createDay(seed,family),render=createRenderer(canvas,day.path);
@@ -20,10 +20,7 @@ export function mountKolam(canvas,seed,onRenew=()=>{},family){
   return {
     get day(){return day;},get paused(){return paused;},
     setPaused(value){paused=value;cancelAnimationFrame(frame);frame=0;start();},
-    renew(nextSeed){
-      if(paused){replace(createDay(nextSeed));finishDrawing(day);render.draw(day);}
-      else beginWashing(day,nextSeed);
-    },
+    renew(nextSeed){replace(createDay(nextSeed));if(paused)finishDrawing(day);render.draw(day);start();},
     dispose(){disposed=true;cancelAnimationFrame(frame);window.removeEventListener('resize',resize);document.removeEventListener('visibilitychange',visibility);motion.removeEventListener('change',reduced);render.dispose();},
   };
 }

@@ -3,7 +3,7 @@
 A minimal personal website with a Kolam experience, games section, and support and privacy pages.
 
 - `index.html`: personal landing page
-- `kolam/`: a seeded, animated rice-flour kolam that draws itself, attracts ants, and renews
+- `kolam/`: a daily seeded rice-flour kolam with random and custom seed controls; it draws itself, then gradually attracts ants
 - `games.html`: game listing, including Pixel Cricket
 - `support.html`: general support and links to game support
 - `privacy.html`: website privacy and links to game policies
