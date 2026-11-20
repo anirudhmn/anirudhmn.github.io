@@ -5,6 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#171c1a">
         <meta name="description" content="A quiet, living rice-flour kolam, drawn around dots and discovered by ants.">
+        <script>
+            if (location.pathname.endsWith('/kolam/')) {
+                location.replace(`${location.pathname}index.html${location.search}${location.hash}`);
+            }
+        </script>
         <title>Kolam</title>
         <link rel="stylesheet" href="src/style.css?v=20261120">
     </head>
