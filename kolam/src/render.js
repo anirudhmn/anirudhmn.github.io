@@ -1,12 +1,12 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261122';
-import {resolution} from './flour.js?v=20261122';
+import {randomFromSeed} from './random.js?v=20261123';
+import {resolution} from './flour.js?v=20261123';
 export function createRenderer(canvas,path){
-  const ground=document.createElement('canvas'),powder=document.createElement('canvas'),ornament=document.createElement('canvas');
-  const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d'),o=ornament.getContext('2d');
+  const ground=document.createElement('canvas'),powder=document.createElement('canvas');
+  const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d');
   let width,height,scale,cx,cy,drawn=0,removed=0;
   function resize(){
     width=window.innerWidth;height=window.innerHeight;const ratio=Math.min(devicePixelRatio||1,2);
-    for(const surface of [canvas,ground,powder,ornament]){surface.width=Math.round(width*ratio);surface.height=Math.round(height*ratio);surface.getContext('2d').setTransform(ratio,0,0,ratio,0,0);}
+    for(const surface of [canvas,ground,powder]){surface.width=Math.round(width*ratio);surface.height=Math.round(height*ratio);surface.getContext('2d').setTransform(ratio,0,0,ratio,0,0);}
     scale=Math.min(width*.78,height*.75)/(path.size-.1);cx=width/2;cy=height*.51;drawn=0;removed=0;
     const random=randomFromSeed(`${path.seed}:ground`);
     const base=g.createLinearGradient(0,0,width,height);
@@ -24,42 +24,6 @@ export function createRenderer(canvas,path){
     const vignette=g.createRadialGradient(cx,cy*.92,Math.min(width,height)*.2,cx,cy,width*.77);
     vignette.addColorStop(0,'rgba(0,0,0,0)');vignette.addColorStop(1,'rgba(3,8,8,.38)');
     g.fillStyle=vignette;g.fillRect(0,0,width,height);
-    drawOrnaments();
-  }
-  function drawOrnaments(){
-    const random=randomFromSeed(`${path.seed}:rangoli`),vermillion='#d84a34',marigold='#f0b323',ivory='#eee8d7';
-    const {color,flourish:hasFlourish}=accentsForSeed(path.seed);
-    const px=(x,y)=>({x:cx+x*scale,y:cy+y*scale});
-    function powderDot(x,y,r,color){
-      const p=px(x,y),radius=r*scale;
-      o.fillStyle=color;o.beginPath();o.arc(p.x,p.y,radius,0,Math.PI*2);o.fill();
-      o.fillStyle='rgba(255,246,220,.42)';
-      for(let i=0;i<10;i++){const a=random()*Math.PI*2,d=radius*(.25+random()*.9);o.fillRect(p.x+Math.cos(a)*d,p.y+Math.sin(a)*d,.7+random(),.7+random());}
-    }
-    function petal(x,y,angle,length,width,color){
-      const p=px(x,y),l=length*scale,w=width*scale;
-      o.save();o.translate(p.x,p.y);o.rotate(angle);o.fillStyle=color;o.strokeStyle='rgba(246,229,184,.9)';o.lineWidth=Math.max(1,scale*.014);
-      o.beginPath();o.moveTo(0,0);o.bezierCurveTo(-w,-l*.3,-w*.75,-l,0,-l);o.bezierCurveTo(w*.75,-l,w,-l*.3,0,0);o.fill();o.stroke();o.restore();
-    }
-    function flourish(x,y,angle,size,color){
-      const p=px(x,y),s=size*scale;
-      o.save();o.translate(p.x,p.y);o.rotate(angle);o.strokeStyle=color;o.lineWidth=Math.max(1,scale*.018);o.lineCap='round';o.beginPath();
-      o.moveTo(0,0);o.bezierCurveTo(s*.08,-s*.5,s*.65,-s*.48,s*.48,-s*.08);o.bezierCurveTo(s*.36,s*.18,s*.05,s*.05,s*.22,-s*.18);
-      o.moveTo(-s*.08,-s*.05);o.quadraticCurveTo(-s*.48,-s*.38,-s*.42,-s*.72);o.stroke();o.restore();
-    }
-    const reach=(path.size-1)/2+.08,lotus=random()<.55,rotation=0;
-    for(let i=0;i<4;i++){
-      const a=rotation+i*Math.PI/2,x=Math.cos(a)*reach,y=Math.sin(a)*reach;
-      if(color&&lotus){
-        for(let j=-2;j<=2;j++)petal(x,y,a-Math.PI/2+j*.34,.32+random()*.06,.09,j===0?marigold:vermillion);
-        powderDot(x,y,.052,marigold);
-      }else if(color){
-        for(let j=-1;j<=1;j++)powderDot(x+Math.cos(a+Math.PI/2)*j*.12,y+Math.sin(a+Math.PI/2)*j*.12,.045,j===0?marigold:vermillion);
-        petal(x,y,a-Math.PI/2,.31,.08,vermillion);
-      }
-      if(hasFlourish)flourish(x+Math.cos(a+Math.PI/2)*.12,y+Math.sin(a+Math.PI/2)*.12,a-Math.PI/2,.42,ivory);
-      if(!color&&i===0)powderDot(x,y,.026,ivory);
-    }
   }
   function drawGrain(p){
     if(p.removed)return;
@@ -110,9 +74,7 @@ export function createRenderer(canvas,path){
     if(drawn===0)removed=flour.removed.length;
     for(;drawn<flour.deposited;drawn++)drawGrain(flour.grains[drawn]);
     redrawRemoved(flour);c.clearRect(0,0,width,height);c.drawImage(ground,0,0,width,height);c.drawImage(powder,0,0,width,height);
-    const accentAlpha=day.phase==='drawing'?Math.min(1,day.age/42):day.phase==='living'?Math.max(0,day.flour.totalQuantity/(day.flour.initialQuantity||1)):0;
-    c.globalAlpha=accentAlpha;c.drawImage(ornament,0,0,width,height);c.globalAlpha=1;
     for(const ant of ants.ants)drawAnt(ant);
   }
-  resize();return {draw,resize,dispose(){for(const surface of [canvas,ground,powder,ornament]){surface.width=0;surface.height=0;}}};
+  resize();return {draw,resize,dispose(){for(const surface of [canvas,ground,powder]){surface.width=0;surface.height=0;}}};
 }

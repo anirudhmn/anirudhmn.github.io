@@ -1,4 +1,4 @@
-import {mountKolam} from './playback.js?v=20261122';
+import {mountKolam} from './playback.js?v=20261123';
 
 const canvas=document.querySelector('canvas');
 const menu=document.querySelector('#menu');

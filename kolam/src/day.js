@@ -1,6 +1,6 @@
-import {constructKolam} from './kolam.js?v=20261122';
-import {createFlour,advanceFlour} from './flour.js?v=20261122';
-import {createAnts,stepAnts} from './ants.js?v=20261122';
+import {constructKolam} from './kolam.js?v=20261123';
+import {createFlour,advanceFlour} from './flour.js?v=20261123';
+import {createAnts,stepAnts} from './ants.js?v=20261123';
 
 export const drawingDuration=42;
 
@@ -11,7 +11,7 @@ export function createDay(seed,family){
 }
 
 export function finishDrawing(day){
-  advanceFlour(day.flour,day.path.length);
+  advanceFlour(day.flour,day.flour.drawLength);
   day.flour.initialQuantity=day.flour.totalQuantity;
   day.phase='living';
   day.age=0;
@@ -20,7 +20,7 @@ export function finishDrawing(day){
 export function stepDay(day,dt){
   if(day.phase==='drawing'){
     day.age+=dt;
-    advanceFlour(day.flour,day.path.length*Math.min(1,day.age/drawingDuration));
+    advanceFlour(day.flour,day.flour.drawLength*Math.min(1,day.age/drawingDuration));
     if(day.age>=drawingDuration)finishDrawing(day);
   }else{
     day.age+=dt;
