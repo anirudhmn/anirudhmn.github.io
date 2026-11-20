@@ -1,4 +1,4 @@
-import {mountKolam} from './playback.js';
+import {mountKolam} from './playback.js?v=20261120';
 
 const canvas=document.querySelector('canvas');
 const menu=document.querySelector('#menu');
@@ -14,12 +14,26 @@ function dailySeed(date=new Date()){
 }
 
 function readSeed(){
+  const querySeed=new URLSearchParams(location.search).get('seed');
+  if(querySeed)return querySeed.slice(0,200);
   const hash=location.hash.slice(1);
   const params=new URLSearchParams(hash.includes('&')?hash.slice(hash.indexOf('&')+1):hash);
   return params.get('seed')?.slice(0,200)||null;
 }
 
-function seedUrl(seed){return `${location.pathname}${location.search}#seed=${encodeURIComponent(seed)}`;}
+function seedUrl(seed){
+  const url=new URL(location.href);
+  url.searchParams.set('seed',seed);
+  url.hash='';
+  return `${url.pathname}${url.search}`;
+}
+
+function todayUrl(){
+  const url=new URL(location.href);
+  url.searchParams.delete('seed');
+  url.hash='';
+  return `${url.pathname}${url.search}`;
+}
 
 function mount(seed=readSeed()||dailySeed()){
   work?.dispose();
@@ -32,7 +46,7 @@ function useSeed(seed,shareable=true){
   const clean=String(seed).trim().slice(0,200);
   if(!clean){notice.textContent='Enter a seed to grow its kolam.';seedInput.focus();return;}
   work.renew(clean);
-  history.pushState(null,'',shareable?seedUrl(clean):`${location.pathname}${location.search}`);
+  history.pushState(null,'',shareable?seedUrl(clean):todayUrl());
   menu.open=false;
   notice.textContent='';
 }

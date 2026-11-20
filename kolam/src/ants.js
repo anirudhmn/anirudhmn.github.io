@@ -1,5 +1,5 @@
-import {randomFromSeed} from './random.js';
-import {collectFlour,cellAt} from './flour.js';
+import {randomFromSeed} from './random.js?v=20261120';
+import {collectFlour,cellAt} from './flour.js?v=20261120';
 const trailSize=80,capacity=90;
 const turn=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 function trailCell(world,x,y){const col=Math.floor((x/world.extent+.5)*trailSize),row=Math.floor((y/world.extent+.5)*trailSize);return col<0||row<0||col>=trailSize||row>=trailSize?-1:row*trailSize+col;}

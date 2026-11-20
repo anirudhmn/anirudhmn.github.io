@@ -1,5 +1,5 @@
-import {randomFromSeed} from './random.js';
-import {pointAt} from './kolam.js';
+import {randomFromSeed} from './random.js?v=20261120';
+import {pointAt} from './kolam.js?v=20261120';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);

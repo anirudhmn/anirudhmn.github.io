@@ -1,5 +1,5 @@
-import {createDay,finishDrawing,stepDay} from './day.js';
-import {createRenderer} from './render.js';
+import {createDay,finishDrawing,stepDay} from './day.js?v=20261120';
+import {createRenderer} from './render.js?v=20261120';
 export function mountKolam(canvas,seed,onRenew=()=>{},family){
   let day=createDay(seed,family),render=createRenderer(canvas,day.path);
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
@@ -16,11 +16,22 @@ export function mountKolam(canvas,seed,onRenew=()=>{},family){
   function visibility(){if(document.hidden){cancelAnimationFrame(frame);frame=0;}else start();}
   function resize(){render.resize();render.draw(day);}
   function reduced(){if(motion.matches){paused=true;cancelAnimationFrame(frame);frame=0;if(day.phase==='drawing')finishDrawing(day);render.draw(day);}}
-  window.addEventListener('resize',resize);document.addEventListener('visibilitychange',visibility);motion.addEventListener('change',reduced);start();
+  window.addEventListener('resize',resize);
+  document.addEventListener('visibilitychange',visibility);
+  if(typeof motion.addEventListener==='function')motion.addEventListener('change',reduced);
+  else motion.addListener(reduced);
+  start();
   return {
     get day(){return day;},get paused(){return paused;},
     setPaused(value){paused=value;cancelAnimationFrame(frame);frame=0;start();},
     renew(nextSeed){replace(createDay(nextSeed));if(paused)finishDrawing(day);render.draw(day);start();},
-    dispose(){disposed=true;cancelAnimationFrame(frame);window.removeEventListener('resize',resize);document.removeEventListener('visibilitychange',visibility);motion.removeEventListener('change',reduced);render.dispose();},
+    dispose(){
+      disposed=true;cancelAnimationFrame(frame);
+      window.removeEventListener('resize',resize);
+      document.removeEventListener('visibilitychange',visibility);
+      if(typeof motion.removeEventListener==='function')motion.removeEventListener('change',reduced);
+      else motion.removeListener(reduced);
+      render.dispose();
+    },
   };
 }
