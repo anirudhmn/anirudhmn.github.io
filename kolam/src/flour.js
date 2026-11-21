@@ -1,5 +1,5 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-flourishes';
-import {pointAt} from './kolam.js?v=20261120-flourishes';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-color-98';
+import {pointAt} from './kolam.js?v=20261120-color-98';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -62,12 +62,16 @@ export function createFlour(path){
       const selected=style==='all'||(style==='center'&&dot.x===0&&dot.y===0)||(style==='tips'&&isTip)||(style==='scattered'&&random()<.34);
       dotColors.set(key,selected);
     }
-    for(let i=0;i<150;i++){
+    // A colored kolam dot covers four times the area of a plain flour dot.
+    // Scale the grain count with area so the larger red/yellow mark stays as
+    // full and powder-dense as the white marks around it.
+    const selected=dotColors.get(key),grainCount=selected?600:150;
+    for(let i=0;i<grainCount;i++){
       // Colored dots keep the same red center footprint as a plain dot, then
       // add a yellow ring of equal thickness around it.
-      const a=random()*Math.PI*2,selected=dotColors.get(key),r=Math.sqrt(random())*(selected ? .086 : .043);
+      const a=random()*Math.PI*2,r=Math.sqrt(random())*(selected ? .086 : .043);
       const pigment=selected?(r<.043?'vermillion':'marigold'):null;
-      grains.push({x:dot.x+Math.cos(a)*r,y:dot.y+Math.sin(a)*r,radius:.003+random()*.004,shade:random(),pigment,distance:-1});
+      grains.push({x:dot.x+Math.cos(a)*r,y:dot.y+Math.sin(a)*r,radius:.0032+random()*.0045,shade:random(),pigment,distance:-1});
     }
   }
   const count=Math.ceil(path.length*1500);
@@ -82,7 +86,9 @@ export function createFlour(path){
     const half=(path.size-1)/2;
     const corners=path.layout==='square'?[[-half,-half],[-half,half],[half,-half],[half,half]]:[[0,-half],[-half,0],[half,0],[0,half]];
     for(const [x,y] of corners){
-      const angle=Math.atan2(y,x),rootX=x+Math.cos(angle)*(path.radius+1),rootY=y+Math.sin(angle)*(path.radius+1);
+      // Start flourishes just beyond the corner loop so they grow out of it,
+      // instead of appearing as a separate mark far away from the kolam.
+      const angle=Math.atan2(y,x),rootX=x+Math.cos(angle)*(path.radius+.04),rootY=y+Math.sin(angle)*(path.radius+.04);
       for(const stroke of flourishStrokes(rootX,rootY,angle,flourish))drawLength=addStrokeGrains(grains,stroke,random,drawLength);
     }
   }
