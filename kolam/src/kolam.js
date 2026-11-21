@@ -1,5 +1,5 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-6';
-import {createEasterEgg} from './easter-eggs.js?v=20261121-pixel-trace-6';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-7';
+import {createEasterEgg} from './easter-eggs.js?v=20261121-pixel-trace-7';
 const TAU=Math.PI*2,opening=Math.PI/4-.055;
 
 // X crossing, D uncrossed join, B unjoined loops. This selects a single-strand
