@@ -1,6 +1,6 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-15';
-import {pointAt} from './kolam.js?v=20261121-pixel-trace-15';
-import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-15';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-16';
+import {pointAt} from './kolam.js?v=20261121-pixel-trace-16';
+import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-16';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -81,15 +81,34 @@ function createEasterEggFlour(path){
       distance:(patchProgress*.84+grainProgress*.16)*drawLength,
     });
   }
-  // A restrained warm shadow just outside the lower-right edge of the traced
-  // nose gives the outline a little depth without obscuring the flour line.
+  // The original nose trace sits faintly among the facial flour. Add a short,
+  // clearly placed highlight and warm shadow to define its bridge and tip.
+  // Fill the lips in one red and leave a narrow background seam at the center.
   if(path.easterEgg==='samyukta'){
-    const shadow=[{x:570,y:508},{x:572,y:516},{x:571,y:525},{x:568,y:534},{x:563,y:541},{x:556,y:546},{x:549,y:548}];
-    for(let segment=1;segment<shadow.length;segment++){
-      const a=shadow[segment-1],b=shadow[segment],length=Math.hypot(b.x-a.x,b.y-a.y),count=Math.ceil(length*1.15);
-      for(let i=0;i<count;i++){
-        const t=i/count,x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;
-        grains.push({x:world(x),y:world(y),radius:.0032+revealRandom()*.0018,shade:.34+revealRandom()*.18,pigment:'shadow',distance:100+revealRandom()*.2});
+    const addFeatureStroke=(points,pigment,radius,density=2.2)=>{
+      for(let segment=1;segment<points.length;segment++){
+        const a=points[segment-1],b=points[segment],length=Math.hypot(b.x-a.x,b.y-a.y),count=Math.ceil(length*density);
+        for(let i=0;i<count;i++){
+          const t=i/count,x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;
+          grains.push({x:world(x),y:world(y),radius:radius*(.78+revealRandom()*.44),shade:revealRandom(),pigment,distance:99.8+revealRandom()*.18});
+        }
+      }
+    };
+    // Light on the bridge, with a warmer contour just to its right and under
+    // the tip. The asymmetry keeps the nose soft rather than diagrammatic.
+    addFeatureStroke([{x:612,y:856},{x:619,y:877},{x:625,y:899},{x:638,y:916},{x:650,y:919}], 'noseLight', .0048, 2.7);
+    addFeatureStroke([{x:630,y:860},{x:636,y:883},{x:642,y:902},{x:654,y:912},{x:663,y:915},{x:655,y:922},{x:643,y:922}], 'shadow', .0042, 2.4);
+    addFeatureStroke([{x:637,y:926},{x:646,y:929},{x:655,y:927}], 'shadow', .0035, 2.2);
+
+    // Softly filled upper and lower lips with a defined center seam.
+    const lipHalfWidth=108;
+    for(let ix=-108;ix<=108;ix+=1.65){
+      const t=ix/lipHalfWidth,edge=Math.abs(t),x=626+ix;
+      const upper=1035+15*edge*edge, seam=1060+10*edge, lower=1120-50*edge;
+      for(let y=upper;y<=lower;y+=1.7){
+        if(Math.abs(y-seam)<1.5)continue;
+        const jitterX=(revealRandom()-.5)*1.2,jitterY=(revealRandom()-.5)*1.2;
+        grains.push({x:world(x+jitterX),y:world(y+jitterY),radius:.0042+revealRandom()*.0028,shade:.25+revealRandom()*.6,pigment:'lipRed',distance:99.8+revealRandom()*.18});
       }
     }
   }

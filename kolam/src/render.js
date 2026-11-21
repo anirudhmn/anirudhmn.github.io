@@ -1,5 +1,5 @@
-import {randomFromSeed} from './random.js?v=20261121-pixel-trace-15';
-import {resolution} from './flour.js?v=20261121-pixel-trace-15';
+import {randomFromSeed} from './random.js?v=20261121-pixel-trace-16';
+import {resolution} from './flour.js?v=20261121-pixel-trace-16';
 export function createRenderer(canvas,path){
   const ground=document.createElement('canvas'),powder=document.createElement('canvas');
   const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d');
@@ -29,7 +29,7 @@ export function createRenderer(canvas,path){
   }
   function drawGrain(p){
     if(p.removed)return;
-    f.fillStyle=p.pigment==='shadow'?'rgba(112,91,76,.52)':p.pigment==='vermillion'?(p.shade<.5?'rgba(196,54,37,.98)':'rgba(225,70,48,1)'):p.pigment==='marigold'?(p.shade<.5?'rgba(208,151,25,.98)':'rgba(244,192,45,1)'):p.shade<.16?'rgba(175,174,151,.42)':p.shade<.65?'rgba(231,225,202,.70)':'rgba(251,244,220,.83)';
+    f.fillStyle=p.pigment==='lipRed'?'rgba(198,48,58,.98)':p.pigment==='noseLight'?(p.shade<.5?'rgba(215,194,161,.88)':'rgba(237,220,191,.95)'):p.pigment==='roseLight'?(p.shade<.5?'rgba(174,77,94,.96)':'rgba(207,112,128,.98)'):p.pigment==='rose'?(p.shade<.5?'rgba(111,43,56,.96)':'rgba(157,65,79,1)'):p.pigment==='shadow'?'rgba(112,91,76,.68)':p.pigment==='vermillion'?(p.shade<.5?'rgba(196,54,37,.98)':'rgba(225,70,48,1)'):p.pigment==='marigold'?(p.shade<.5?'rgba(208,151,25,.98)':'rgba(244,192,45,1)'):p.shade<.16?'rgba(175,174,151,.42)':p.shade<.65?'rgba(231,225,202,.70)':'rgba(251,244,220,.83)';
     f.beginPath();f.ellipse(cx+p.x*scale,cy+p.y*scale,Math.max(.24,p.radius*scale),Math.max(.20,p.radius*scale*.72),p.shade*3,0,Math.PI*2);f.fill();
   }
   function redrawRemoved(flour){
