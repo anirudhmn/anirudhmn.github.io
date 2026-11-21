@@ -1,5 +1,5 @@
-import {randomFromSeed} from './random.js?v=20261121-pixel-trace-8';
-import {resolution} from './flour.js?v=20261121-pixel-trace-8';
+import {randomFromSeed} from './random.js?v=20261121-pixel-trace-11';
+import {resolution} from './flour.js?v=20261121-pixel-trace-11';
 export function createRenderer(canvas,path){
   const ground=document.createElement('canvas'),powder=document.createElement('canvas');
   const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d');
@@ -29,7 +29,7 @@ export function createRenderer(canvas,path){
   }
   function drawGrain(p){
     if(p.removed)return;
-    f.fillStyle=p.pigment==='vermillion'?(p.shade<.5?'rgba(196,54,37,.98)':'rgba(225,70,48,1)'):p.pigment==='marigold'?(p.shade<.5?'rgba(208,151,25,.98)':'rgba(244,192,45,1)'):p.shade<.16?'rgba(175,174,151,.42)':p.shade<.65?'rgba(231,225,202,.70)':'rgba(251,244,220,.83)';
+    f.fillStyle=p.pigment==='roseLight'?(p.shade<.5?'rgba(172,80,94,.98)':'rgba(200,112,124,1)'):p.pigment==='rose'?(p.shade<.5?'rgba(111,43,56,.96)':'rgba(157,65,79,1)'):p.pigment==='vermillion'?(p.shade<.5?'rgba(196,54,37,.98)':'rgba(225,70,48,1)'):p.pigment==='marigold'?(p.shade<.5?'rgba(208,151,25,.98)':'rgba(244,192,45,1)'):p.shade<.16?'rgba(175,174,151,.42)':p.shade<.65?'rgba(231,225,202,.70)':'rgba(251,244,220,.83)';
     f.beginPath();f.ellipse(cx+p.x*scale,cy+p.y*scale,Math.max(.24,p.radius*scale),Math.max(.20,p.radius*scale*.72),p.shade*3,0,Math.PI*2);f.fill();
   }
   function redrawRemoved(flour){
@@ -47,47 +47,52 @@ export function createRenderer(canvas,path){
       f.restore();
     }
   }
-  function drawAnt(ant){
-    if(ant.mode==='resting')return;
+  function drawAnt(ant,flour){
+    if(ant.mode==='resting'||ant.mode==='gone')return;
     c.save();c.translate(cx+ant.x*scale,cy+ant.y*scale);c.rotate(ant.angle);
-    const size=Math.max(14,scale*.18)*(ant.scale||1),stride=ant.mode==='feeding'?0:Math.sin(ant.gait);
+    const size=8*(ant.scale||1),stride=ant.mode==='feeding'?0:Math.sin(ant.gait);
+    let red=0,yellow=0;
+    for(const index of ant.payload){const pigment=flour.grains[index]?.pigment;if(pigment==='vermillion')red++;else if(pigment==='marigold')yellow++;}
+    const parcelColor=red||yellow?(red>yellow?'#c52d24':'#e9ad32'):'#f3ecd6';
+    const parcelEdge=red||yellow?(red>yellow?'#ef6852':'#ffdb70'):'#fff8e7';
     c.lineCap='round';c.lineJoin='round';
     // Six long, jointed legs sit behind the body so they remain easy to read.
     for(let side=-1;side<=1;side+=2)for(let leg=0;leg<3;leg++){
       const hip=[-.17,.015,.17][leg]*size,swing=stride*(leg===1?-1:1)*side*size*.11;
       const kneeX=hip+[-.11,.02,.12][leg]*size+swing*.45;
       const footX=hip+[-.29,.02,.32][leg]*size+swing;
-      c.strokeStyle='rgba(36,22,15,.98)';c.lineWidth=Math.max(1.5,size*.085);c.beginPath();
+      c.strokeStyle='rgba(16,14,13,.99)';c.lineWidth=Math.max(1,size*.085);c.beginPath();
       c.moveTo(hip,side*.035*size);c.lineTo(kneeX,side*.30*size);c.lineTo(footX,side*.54*size);c.stroke();
-      c.strokeStyle='rgba(184,126,78,.95)';c.lineWidth=Math.max(.7,size*.028);c.beginPath();
+      c.strokeStyle='rgba(78,66,57,.9)';c.lineWidth=Math.max(.55,size*.028);c.beginPath();
       c.moveTo(hip,side*.04*size);c.lineTo(kneeX,side*.30*size);c.lineTo(footX,side*.53*size);c.stroke();
     }
     // Three distinct, warm brown body segments with a soft rim highlight.
-    c.fillStyle='#351b12';c.strokeStyle='#b77c4e';c.lineWidth=Math.max(.8,size*.035);
+    c.fillStyle='#171514';c.strokeStyle='#51463e';c.lineWidth=Math.max(.6,size*.035);
     c.beginPath();c.ellipse(-.30*size,0,.235*size,.175*size,-.06,0,Math.PI*2);c.fill();c.stroke();
-    c.fillStyle='#5b3020';c.beginPath();c.ellipse(-.015*size,0,.125*size,.115*size,0,0,Math.PI*2);c.fill();c.stroke();
-    c.fillStyle='#402116';c.beginPath();c.ellipse(.245*size,0,.175*size,.155*size,.02,0,Math.PI*2);c.fill();c.stroke();
-    c.fillStyle='rgba(245,190,126,.68)';c.beginPath();c.ellipse(-.36*size,-.07*size,.12*size,.04*size,-.12,0,Math.PI*2);c.fill();
+    c.fillStyle='#211e1b';c.beginPath();c.ellipse(-.015*size,0,.125*size,.115*size,0,0,Math.PI*2);c.fill();c.stroke();
+    c.fillStyle='#191715';c.beginPath();c.ellipse(.245*size,0,.175*size,.155*size,.02,0,Math.PI*2);c.fill();c.stroke();
+    c.fillStyle='rgba(151,133,115,.55)';c.beginPath();c.ellipse(-.36*size,-.07*size,.12*size,.04*size,-.12,0,Math.PI*2);c.fill();
     // Two curved antennae and short mandibles mark the head at the front.
-    c.strokeStyle='#e0ad78';c.lineWidth=Math.max(1,size*.045);c.beginPath();
+    c.strokeStyle='#a18b74';c.lineWidth=Math.max(.7,size*.045);c.beginPath();
     c.moveTo(.34*size,-.075*size);c.quadraticCurveTo(.48*size,-.30*size,.66*size,-.26*size);
     c.moveTo(.34*size,.075*size);c.quadraticCurveTo(.48*size,.30*size,.66*size,.26*size);
     c.stroke();
-    c.strokeStyle='#27170f';c.lineWidth=Math.max(.8,size*.04);c.beginPath();
+    c.strokeStyle='#151311';c.lineWidth=Math.max(.6,size*.04);c.beginPath();
     c.moveTo(.38*size,-.055*size);c.lineTo(.49*size,-.13*size);c.moveTo(.38*size,.055*size);c.lineTo(.49*size,.13*size);c.stroke();
     // The collected flour rides at the mandibles; it stays attached to the ant.
     if(ant.payload.length){
       const parcel=Math.min(1,Math.max(.65,ant.payload.length/24));
       c.fillStyle='rgba(20,15,11,.7)';c.beginPath();c.ellipse(.52*size,.015*size,.205*size*parcel,.155*size*parcel,.15,0,Math.PI*2);c.fill();
-      c.fillStyle='#f3ecd6';c.strokeStyle='#fff8e7';c.lineWidth=Math.max(.6,size*.025);
+      c.fillStyle=parcelColor;c.strokeStyle=parcelEdge;c.lineWidth=Math.max(.5,size*.025);
       c.beginPath();c.ellipse(.54*size,-.005*size,.18*size*parcel,.13*size*parcel,.15,0,Math.PI*2);c.fill();c.stroke();
-      c.fillStyle='#fff9e9';
+      c.fillStyle=parcelEdge;
       for(const [x,y,r] of [[.47,-.10,.045],[.58,.075,.038],[.63,-.055,.03]]){c.beginPath();c.arc(x*size,y*size,r*size,0,Math.PI*2);c.fill();}
     }
     c.restore();
   }
   function draw(day){
     const {flour,ants}=day;
+    ants.viewport={left:-width/(2*scale),right:width/(2*scale),top:-cy/scale,bottom:(height-cy)/scale};
     if(!ants.edgeInitialized){
       ants.nest={x:-width/(2*scale)+Math.max(10/scale,.035),y:(height/2-cy)/scale};
       for(const ant of ants.ants){ant.x=ants.nest.x;ant.y=ants.nest.y;ant.angle=0;ant.entryAngle=0;}
@@ -96,7 +101,7 @@ export function createRenderer(canvas,path){
     if(drawn===0)removed=flour.removed.length;
     for(;drawn<flour.deposited;drawn++)drawGrain(flour.grains[drawn]);
     redrawRemoved(flour);c.clearRect(0,0,width,height);c.drawImage(ground,0,0,width,height);c.drawImage(powder,0,0,width,height);
-    for(const ant of ants.ants)drawAnt(ant);
+    for(const ant of ants.ants)drawAnt(ant,flour);
   }
   resize();return {draw,resize,dispose(){for(const surface of [canvas,ground,powder]){surface.width=0;surface.height=0;}}};
 }

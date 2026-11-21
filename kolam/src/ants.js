@@ -1,6 +1,6 @@
-import {randomFromSeed} from './random.js?v=20261121-pixel-trace-8';
-import {collectFlour,cellAt} from './flour.js?v=20261121-pixel-trace-8';
-const trailSize=80,capacity=90;
+import {randomFromSeed} from './random.js?v=20261121-pixel-trace-11';
+import {collectFlour,cellAt} from './flour.js?v=20261121-pixel-trace-11';
+const trailSize=80,capacity=180;
 const turn=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 function trailCell(world,x,y){const col=Math.floor((x/world.extent+.5)*trailSize),row=Math.floor((y/world.extent+.5)*trailSize);return col<0||row<0||col>=trailSize||row>=trailSize?-1:row*trailSize+col;}
 export function createAnts(seed,extent){
@@ -12,12 +12,17 @@ export function stepAnts(world,flour,dt){
   world.time+=dt;
   const decay=Math.exp(-dt/24);for(let i=0;i<world.trail.length;i++)world.trail[i]*=decay;
   for(const ant of world.ants){
+    if(ant.mode==='gone'){
+      ant.rest-=dt;
+      if(ant.rest<=0){ant.x=world.nest.x;ant.y=world.nest.y;ant.angle=0;ant.entryAngle=0;ant.mode='resting';ant.rest=0;}
+      continue;
+    }
     if(ant.mode==='resting'){
       ant.rest-=dt;if(ant.rest>0)continue;
       ant.mode='searching';ant.angle=(ant.entryAngle??-.55)+(world.random()-.5)*1.2;ant.entryAngle=undefined;
     }
     if(ant.mode==='feeding'){
-      ant.feeding+=dt;ant.payload.push(...collectFlour(flour,ant.x,ant.y,.048,Math.min(capacity-ant.payload.length,Math.ceil(130*dt))));
+      ant.feeding+=dt;ant.payload.push(...collectFlour(flour,ant.x,ant.y,.075,Math.min(capacity-ant.payload.length,Math.ceil(260*dt))));
       if(ant.feeding>.85||ant.payload.length>=capacity){ant.mode=ant.payload.length?'returning':'searching';ant.feeding=0;}
       continue;
     }
@@ -33,12 +38,14 @@ export function stepAnts(world,flour,dt){
       sensors.sort((a,b)=>b.score-a.score);
       ant.wandering=ant.wandering*.91+(world.random()-.5)*.6;
       ant.angle+=(ant.wandering*2.3+(sensors[0].score>.02?sensors[0].offset*2.8:0))*dt;
-      const payload=collectFlour(flour,ant.x,ant.y,.045,4);
+      const payload=collectFlour(flour,ant.x,ant.y,.065,8);
       if(payload.length){ant.payload.push(...payload);ant.mode='feeding';ant.feeding=0;world.discoveries++;continue;}
     }
     const speed=ant.speed*(ant.mode==='returning'?.82:1);
     ant.x+=Math.cos(ant.angle)*speed*dt;ant.y+=Math.sin(ant.angle)*speed*dt;ant.gait+=dt*20;
-    const bound=world.extent*.95;
-    if(Math.abs(ant.x)>bound||Math.abs(ant.y)>bound){ant.x=Math.max(-bound,Math.min(bound,ant.x));ant.y=Math.max(-bound,Math.min(bound,ant.y));ant.angle=Math.atan2(-ant.y,-ant.x)+(world.random()-.5);}
+    const view=world.viewport;
+    if(ant.mode==='searching'&&view&&(ant.x<view.left-.03||ant.x>view.right+.03||ant.y<view.top-.03||ant.y>view.bottom+.03)){
+      ant.mode='gone';ant.rest=2+world.random()*3;
+    }
   }
 }

@@ -1,6 +1,6 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-8';
-import {pointAt} from './kolam.js?v=20261121-pixel-trace-8';
-import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-8';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-11';
+import {pointAt} from './kolam.js?v=20261121-pixel-trace-11';
+import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-11';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -68,17 +68,21 @@ function createEasterEggFlour(path){
   const binary=Uint8Array.from(atob(encoded),char=>char.charCodeAt(0));
   const pixels=1254,sourceExtent=10.8,world=value=>(value/(pixels-1)-.5)*sourceExtent;
   const grains=[];let drawLength=100;
+  const revealRandom=randomFromSeed(`${path.seed}:easter-reveal`),tileReveal=new Map(),tileSize=16;
   for(let i=0;i<binary.length;i+=6){
     const x=binary[i]|binary[i+1]<<8,y=binary[i+2]|binary[i+3]<<8,shade=binary[i+4]/255,kind=binary[i+5];
+    const tile=`${Math.floor(x/tileSize)}:${Math.floor(y/tileSize)}`;
+    if(!tileReveal.has(tile))tileReveal.set(tile,revealRandom());
+    const patchProgress=tileReveal.get(tile),grainProgress=revealRandom();
     grains.push({
       x:world(x),y:world(y),
       radius:kind===3?.003+.004*shade:kind===0?.0045+.006*shade:.006+.005*shade,
-      shade,pigment:kind===1?'vermillion':kind===2?'marigold':undefined,
-      distance:((y*pixels+x)/(pixels*pixels))*drawLength,
+      shade,pigment:kind===1?'vermillion':kind===2?'marigold':kind===4?'rose':kind===5?'roseLight':undefined,
+      distance:(patchProgress*.84+grainProgress*.16)*drawLength,
     });
   }
   grains.sort((a,b)=>a.distance-b.distance);
-  return {grains,extent:path.extent,drawLength,accentStyle:'easter-egg',deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
+  return {grains,extent:path.extent,drawLength,drawDuration:60,accentStyle:'easter-egg',deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
 }
 export function createFlour(path){
   if(path.easterEgg)return createEasterEggFlour(path);

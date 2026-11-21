@@ -1,5 +1,5 @@
-import {createDay,finishDrawing,stepDay} from './day.js?v=20261121-pixel-trace-8';
-import {createRenderer} from './render.js?v=20261121-smaller-ants';
+import {createDay,finishDrawing,stepDay} from './day.js?v=20261121-pixel-trace-11';
+import {createRenderer} from './render.js?v=20261121-pixel-trace-11';
 export function mountKolam(canvas,seed,onRenew=()=>{},family){
   let day=createDay(seed,family),render=createRenderer(canvas,day.path);
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
