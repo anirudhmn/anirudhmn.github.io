@@ -19,9 +19,11 @@ export function addSamyuktaFaceDetails(grains,world,random,revealDistance){
   // Continue the raster's red flour through the full lip-shaped unshaded area.
   // These bounds follow the wider, fuller outline in the close-up; grain size,
   // shade, and pigment match the existing vermillion pixels in the portrait.
-  const centerX=605,halfWidth=72;
-  for(let i=0,added=0;i<5000&&added<1030;i++){
-    const x=centerX+(random()*2-1)*halfWidth,t=(x-centerX)/halfWidth,edge=Math.abs(t);
+  const centerX=605,leftWidth=72*.95,rightWidth=72*.80,totalWidth=leftWidth+rightWidth;
+  for(let i=0,added=0;i<5000&&added<900;i++){
+    const side=random()<leftWidth/totalWidth?-1:1;
+    const halfWidth=side<0?leftWidth:rightWidth;
+    const x=centerX+side*random()*halfWidth,t=(x-centerX)/halfWidth,edge=Math.abs(t);
     const upper=554+20*edge*edge-2.3*Math.exp(-(((edge-.22)/.16)**2));
     const lower=614-38*edge*edge;
     const y=upper+random()*(lower-upper);
