@@ -1,6 +1,6 @@
 import {randomFromSeed} from './random.js?v=20261121-pixel-trace-18';
 import {collectFlour,cellAt} from './flour.js?v=20261121-pixel-trace-18';
-const trailSize=80,capacity=1000;
+const trailSize=80,capacity=2000;
 const turn=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 function trailCell(world,x,y){const col=Math.floor((x/world.extent+.5)*trailSize),row=Math.floor((y/world.extent+.5)*trailSize);return col<0||row<0||col>=trailSize||row>=trailSize?-1:row*trailSize+col;}
 export function createAnts(seed,extent){
@@ -16,7 +16,7 @@ export function stepAnts(world,flour,dt){
   for(const ant of world.ants){
     if(ant.mode==='gone'){
       ant.rest-=dt;
-      if(ant.rest<=0){ant.x=world.nest.x;ant.y=world.nest.y;ant.angle=0;ant.entryAngle=0;ant.mode='resting';ant.rest=0;}
+      if(ant.rest<=0){ant.x=world.nest.x;ant.y=world.nest.y;ant.angle=-Math.PI/4;ant.entryAngle=-Math.PI/4;ant.mode='resting';ant.rest=0;}
       continue;
     }
     if(ant.mode==='resting'){
@@ -24,7 +24,7 @@ export function stepAnts(world,flour,dt){
       ant.mode='searching';ant.angle=(ant.entryAngle??-.55)+(world.random()-.5)*1.2;ant.entryAngle=undefined;
     }
     if(ant.mode==='feeding'){
-      ant.feeding+=dt;ant.payload.push(...collectFlour(flour,ant.x,ant.y,.085,Math.min(capacity-ant.payload.length,Math.ceil(1200*dt))));
+      ant.feeding+=dt;ant.payload.push(...collectFlour(flour,ant.x,ant.y,.10,Math.min(capacity-ant.payload.length,Math.ceil(2400*dt))));
       if(ant.feeding>.85||ant.payload.length>=capacity){ant.mode=ant.payload.length?'returning':'searching';ant.feeding=0;}
       continue;
     }
@@ -40,7 +40,7 @@ export function stepAnts(world,flour,dt){
       sensors.sort((a,b)=>b.score-a.score);
       ant.wandering=ant.wandering*.91+(world.random()-.5)*.6;
       ant.angle+=(ant.wandering*2.3+(sensors[0].score>.02?sensors[0].offset*2.8:0))*dt;
-      const payload=collectFlour(flour,ant.x,ant.y,.075,12);
+      const payload=collectFlour(flour,ant.x,ant.y,.09,24);
       if(payload.length){ant.payload.push(...payload);ant.mode='feeding';ant.feeding=0;world.discoveries++;continue;}
     }
     const speed=ant.speed*(ant.mode==='returning'?.82:1);

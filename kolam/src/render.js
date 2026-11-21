@@ -94,8 +94,8 @@ export function createRenderer(canvas,path){
     const {flour,ants}=day;
     ants.viewport={left:-width/(2*scale),right:width/(2*scale),top:-cy/scale,bottom:(height-cy)/scale};
     if(!ants.edgeInitialized){
-      ants.nest={x:-width/(2*scale)+Math.max(10/scale,.035),y:(height/2-cy)/scale};
-      for(const ant of ants.ants){ant.x=ants.nest.x;ant.y=ants.nest.y;ant.angle=0;ant.entryAngle=0;}
+      ants.nest={x:-width/(2*scale)+Math.max(10/scale,.035),y:(height-cy)/scale-Math.max(10/scale,.035)};
+      for(const ant of ants.ants){ant.x=ants.nest.x;ant.y=ants.nest.y;ant.angle=-Math.PI/4;ant.entryAngle=-Math.PI/4;}
       ants.edgeInitialized=true;
     }
     if(drawn===0)removed=flour.removed.length;
