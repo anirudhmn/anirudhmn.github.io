@@ -1,7 +1,7 @@
 import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-18';
 import {pointAt} from './kolam.js?v=20261121-pixel-trace-18';
 import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-18';
-import {addSamyuktaFaceDetails} from './samyukta-easter-egg.js?v=20261121-samyukta-mouth-3';
+import {addSamyuktaFaceDetails} from './samyukta-easter-egg.js?v=20261121-samyukta-mouth-4';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -70,6 +70,11 @@ function createEasterEggFlour(path){
   const pixels=1254,sourceExtent=10.8,world=value=>(value/(pixels-1)-.5)*sourceExtent;
   const grains=[];let drawLength=100;
   const revealRandom=randomFromSeed(`${path.seed}:easter-reveal`),tileReveal=new Map(),tileSize=16;
+  const revealDistance=(x,y)=>{
+    const tile=`${Math.floor(x/tileSize)}:${Math.floor(y/tileSize)}`;
+    if(!tileReveal.has(tile))tileReveal.set(tile,revealRandom());
+    return (tileReveal.get(tile)*.84+revealRandom()*.16)*drawLength;
+  };
   for(let i=0;i<binary.length;i+=6){
     const x=binary[i]|binary[i+1]<<8,y=binary[i+2]|binary[i+3]<<8,shade=binary[i+4]/255,kind=binary[i+5];
     const tile=`${Math.floor(x/tileSize)}:${Math.floor(y/tileSize)}`;
@@ -82,7 +87,7 @@ function createEasterEggFlour(path){
       distance:(patchProgress*.84+grainProgress*.16)*drawLength,
     });
   }
-  if(path.easterEgg==='samyukta')addSamyuktaFaceDetails(grains,world,revealRandom);
+  if(path.easterEgg==='samyukta')addSamyuktaFaceDetails(grains,world,revealRandom,revealDistance);
   grains.sort((a,b)=>a.distance-b.distance);
   return {grains,extent:path.extent,drawLength,drawDuration:60,accentStyle:'easter-egg',deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
 }

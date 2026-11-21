@@ -1,11 +1,11 @@
 // Face details that belong only to the Samyukta portrait easter egg.
-export function addSamyuktaFaceDetails(grains,world,random){
+export function addSamyuktaFaceDetails(grains,world,random,revealDistance){
   const addStroke=(points,pigment,radius,density=2.2)=>{
     for(let segment=1;segment<points.length;segment++){
       const a=points[segment-1],b=points[segment],length=Math.hypot(b.x-a.x,b.y-a.y),count=Math.ceil(length*density);
       for(let i=0;i<count;i++){
         const t=i/count,x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;
-        grains.push({x:world(x),y:world(y),radius:radius*(.78+random()*.44),shade:random(),pigment,distance:99.8+random()*.18});
+        grains.push({x:world(x),y:world(y),radius:radius*(.78+random()*.44),shade:random(),pigment,distance:revealDistance(x,y)});
       }
     }
   };
@@ -19,8 +19,8 @@ export function addSamyuktaFaceDetails(grains,world,random){
   // Continue the raster's red flour through the full lip-shaped unshaded area.
   // These bounds follow the wider, fuller outline in the close-up; grain size,
   // shade, and pigment match the existing vermillion pixels in the portrait.
-  const centerX=605,halfWidth=84;
-  for(let i=0,added=0;i<5000&&added<1200;i++){
+  const centerX=605,halfWidth=72;
+  for(let i=0,added=0;i<5000&&added<1030;i++){
     const x=centerX+(random()*2-1)*halfWidth,t=(x-centerX)/halfWidth,edge=Math.abs(t);
     const upper=554+20*edge*edge-2.3*Math.exp(-(((edge-.22)/.16)**2));
     const lower=614-38*edge*edge;
@@ -35,7 +35,7 @@ export function addSamyuktaFaceDetails(grains,world,random){
       radius:.003+shade*.003,
       shade,
       pigment:'vermillion',
-      distance:99.8+random()*.18,
+      distance:revealDistance(x,y),
     });
     added++;
   }
