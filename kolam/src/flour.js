@@ -1,5 +1,5 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-gallery';
-import {pointAt} from './kolam.js?v=20261120-gallery';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-easter-eggs';
+import {pointAt} from './kolam.js?v=20261121-easter-eggs';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -52,7 +52,40 @@ function addStrokeGrains(grains,points,random,offset){
   }
   return offset+length;
 }
+function createEasterEggFlour(path){
+  const random=randomFromSeed(`${path.seed}:easter-flour`),grains=[];
+  for(const dot of path.dots){
+    for(let i=0;i<150;i++){
+      const angle=random()*Math.PI*2,r=Math.sqrt(random())*dot.radius;
+      grains.push({x:dot.x+Math.cos(angle)*r,y:dot.y+Math.sin(angle)*r,radius:.0028+random()*.0038,shade:random(),distance:-1});
+    }
+  }
+  for(const dot of path.accentDots){
+    for(let i=0;i<300;i++){
+      const angle=random()*Math.PI*2,r=Math.sqrt(random())*dot.radius;
+      const pigment=dot.color==='vermillion'&&dot.ring!==false&&r>=dot.radius*.5?'marigold':dot.color;
+      grains.push({x:dot.x+Math.cos(angle)*r,y:dot.y+Math.sin(angle)*r,radius:.0032+random()*.0045,shade:random(),pigment,distance:-1});
+    }
+  }
+  let drawLength=0;
+  for(const stroke of path.strokes){
+    const cumulative=[0];
+    for(let i=1;i<stroke.length;i++)cumulative.push(cumulative[i-1]+Math.hypot(stroke[i].x-stroke[i-1].x,stroke[i].y-stroke[i-1].y));
+    const length=cumulative[cumulative.length-1],count=Math.ceil(length*300);
+    for(let i=0;i<count;i++){
+      const distance=length*i/count;let index=1;
+      while(index<cumulative.length-1&&cumulative[index]<distance)index++;
+      const a=stroke[index-1],b=stroke[index],span=cumulative[index]-cumulative[index-1],t=span?(distance-cumulative[index-1])/span:0;
+      const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t,angle=Math.atan2(b.y-a.y,b.x-a.x);
+      const flow=1+.16*Math.sin(distance*3.1),scatter=(random()+random()+random()-1.5)*.010*flow;
+      grains.push({x:x-Math.sin(angle)*scatter+(random()-.5)*.006,y:y+Math.cos(angle)*scatter+(random()-.5)*.006,radius:(.005+random()*.009)*flow,shade:random(),distance:drawLength+distance});
+    }
+    drawLength+=length;
+  }
+  return {grains,extent:path.extent,drawLength,accentStyle:'easter-egg',deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
+}
 export function createFlour(path){
+  if(path.easterEgg)return createEasterEggFlour(path);
   const random=randomFromSeed(`${path.seed}:flour`),grains=[];
   const {color,flourish}=accentsForSeed(path.seed),style=color?['center','scattered','tips','all'][Math.floor(random()*4)]:'none',dotColors=new Map();
   for(const dot of path.dots){

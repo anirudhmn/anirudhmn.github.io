@@ -1,9 +1,12 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-gallery';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-easter-eggs';
+import {createEasterEgg} from './easter-eggs.js?v=20261121-easter-eggs';
 const TAU=Math.PI*2,opening=Math.PI/4-.055;
 
 // X crossing, D uncrossed join, B unjoined loops. This selects a single-strand
 // subset of the local bond vocabulary in Gopalan & VanLeeuwen (1503.02130).
 export function constructKolam(seed='4',family) {
+  const easterEgg=createEasterEgg(seed);
+  if(easterEgg)return easterEgg;
   const random=randomFromSeed(seed),generated=random()<.5?'diamond':'square';
   const layout=family?.layout||generated;
   const flourish=accentsForSeed(seed).flourish;

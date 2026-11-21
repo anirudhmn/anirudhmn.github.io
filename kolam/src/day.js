@@ -1,6 +1,6 @@
-import {constructKolam} from './kolam.js?v=20261120-gallery';
-import {createFlour,advanceFlour} from './flour.js?v=20261120-gallery';
-import {createAnts,stepAnts} from './ants.js?v=20261120-gallery';
+import {constructKolam} from './kolam.js?v=20261121-easter-eggs';
+import {createFlour,advanceFlour} from './flour.js?v=20261121-easter-eggs';
+import {createAnts,stepAnts} from './ants.js?v=20261121-easter-eggs';
 
 export const drawingDuration=42;
 

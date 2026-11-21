@@ -1,5 +1,5 @@
-import {randomFromSeed} from './random.js?v=20261120-gallery';
-import {resolution} from './flour.js?v=20261120-gallery';
+import {randomFromSeed} from './random.js?v=20261121-easter-eggs';
+import {resolution} from './flour.js?v=20261121-easter-eggs';
 export function createRenderer(canvas,path){
   const ground=document.createElement('canvas'),powder=document.createElement('canvas');
   const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d');
