@@ -1,5 +1,5 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-color-98';
-import {pointAt} from './kolam.js?v=20261120-color-98';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-gallery';
+import {pointAt} from './kolam.js?v=20261120-gallery';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -93,7 +93,7 @@ export function createFlour(path){
     }
   }
   const extentMargin=flourish==='corner-petal'?2.4:flourish?3:1;
-  return {grains,extent:path.size+extentMargin,drawLength,deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
+  return {grains,extent:path.size+extentMargin,drawLength,accentStyle:style,deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
 }
 export function advanceFlour(flour,distance){
   while(flour.deposited<flour.grains.length&&flour.grains[flour.deposited].distance<=distance){

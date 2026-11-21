@@ -1,11 +1,12 @@
-import {randomFromSeed} from './random.js?v=20261120-color-98';
-import {resolution} from './flour.js?v=20261120-color-98';
+import {randomFromSeed} from './random.js?v=20261120-gallery';
+import {resolution} from './flour.js?v=20261120-gallery';
 export function createRenderer(canvas,path){
   const ground=document.createElement('canvas'),powder=document.createElement('canvas');
   const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d');
   let width,height,scale,cx,cy,drawn=0,removed=0;
   function resize(){
-    width=window.innerWidth;height=window.innerHeight;const ratio=Math.min(devicePixelRatio||1,2);
+    const bounds=canvas.getBoundingClientRect();
+    width=Math.max(1,bounds.width||window.innerWidth);height=Math.max(1,bounds.height||window.innerHeight);const ratio=Math.min(devicePixelRatio||1,2);
     for(const surface of [canvas,ground,powder]){surface.width=Math.round(width*ratio);surface.height=Math.round(height*ratio);surface.getContext('2d').setTransform(ratio,0,0,ratio,0,0);}
     const flourishMargin=path.flourish==='corner-petal'?1.4:path.flourish?2.4:0;
     scale=Math.min(width*.78,height*.75)/(path.size-.1+flourishMargin);cx=width/2;cy=height*.51;drawn=0;removed=0;

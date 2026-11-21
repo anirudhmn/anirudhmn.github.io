@@ -1,4 +1,4 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-color-98';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-gallery';
 const TAU=Math.PI*2,opening=Math.PI/4-.055;
 
 // X crossing, D uncrossed join, B unjoined loops. This selects a single-strand
