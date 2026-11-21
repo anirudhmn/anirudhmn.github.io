@@ -5,7 +5,9 @@ const turn=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 function trailCell(world,x,y){const col=Math.floor((x/world.extent+.5)*trailSize),row=Math.floor((y/world.extent+.5)*trailSize);return col<0||row<0||col>=trailSize||row>=trailSize?-1:row*trailSize+col;}
 export function createAnts(seed,extent){
   const random=randomFromSeed(`${seed}:ants`),nest={x:-extent*.49,y:extent*.20};
-  const ants=Array.from({length:28},(_,i)=>({x:nest.x,y:nest.y,angle:-.55+random()*1.8,mode:'resting',rest:i*2.15+random()*1.8,payload:[],feeding:0,speed:.68+random()*.22,gait:random()*6.28,wandering:0,scale:.88+random()*.32}));
+  // Keep the gradual entrance after drawing, but bring the full colony in over
+  // about twelve seconds instead of making the last ants wait nearly a minute.
+  const ants=Array.from({length:28},(_,i)=>({x:nest.x,y:nest.y,angle:-.55+random()*1.8,mode:'resting',rest:i*.42+random()*1.2,payload:[],feeding:0,speed:.68+random()*.22,gait:random()*6.28,wandering:0,scale:.88+random()*.32}));
   return {ants,nest,extent,random,trail:new Float32Array(trailSize**2),delivered:0,discoveries:0,time:0};
 }
 export function stepAnts(world,flour,dt){

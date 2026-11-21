@@ -16,27 +16,27 @@ export function addSamyuktaFaceDetails(grains,world,random){
   addStroke([{x:630,y:860},{x:636,y:883},{x:642,y:902},{x:654,y:912},{x:663,y:915},{x:655,y:922},{x:643,y:922}], 'shadow', .0042, 2.4);
   addStroke([{x:637,y:926},{x:646,y:929},{x:655,y:927}], 'shadow', .0035, 2.2);
 
-  // Fill the raster's lip section (approximately x=559..651, y=561..593).
-  // The upper and lower curves follow a soft cupid's bow and rounded lower lip;
-  // keep only a very fine mouth seam so the red flour covers the full lip area.
-  const centerX=605,halfWidth=47,step=.72;
-  for(let ix=-halfWidth;ix<=halfWidth;ix+=step){
-    const t=ix/halfWidth,edge=Math.abs(t),x=centerX+ix;
-    const upper=562+11*edge*edge-2.2*Math.exp(-(((edge-.22)/.16)**2));
-    const seam=576+2.8*edge;
-    const lower=589-12*edge*edge;
-    for(let y=upper;y<=lower;y+=step){
-      // A narrow, slightly irregular seam gives the two lips definition without
-      // leaving the broad unfloured gap that was visible in the previous fill.
-      if(Math.abs(y-seam)<.72)continue;
-      grains.push({
-        x:world(x+(random()-.5)*.32),
-        y:world(y+(random()-.5)*.32),
-        radius:.0048+random()*.0028,
-        shade:.45+random()*.1,
-        pigment:'lipRed',
-        distance:99.8+random()*.18,
-      });
-    }
+  // Continue the raster's red flour through the full lip-shaped unshaded area.
+  // These bounds follow the wider, fuller outline in the close-up; grain size,
+  // shade, and pigment match the existing vermillion pixels in the portrait.
+  const centerX=605,halfWidth=84;
+  for(let i=0,added=0;i<5000&&added<1200;i++){
+    const x=centerX+(random()*2-1)*halfWidth,t=(x-centerX)/halfWidth,edge=Math.abs(t);
+    const upper=554+20*edge*edge-2.3*Math.exp(-(((edge-.22)/.16)**2));
+    const lower=614-38*edge*edge;
+    const y=upper+random()*(lower-upper);
+    // Keep a narrow natural lip crease, while powdering both sides all the way
+    // to their contours so no black patch remains inside the outline.
+    const seam=578+3*edge;
+    if(Math.abs(y-seam)<1.3)continue;
+    const shade=random()*.15;
+    grains.push({
+      x:world(x),y:world(y),
+      radius:.003+shade*.003,
+      shade,
+      pigment:'vermillion',
+      distance:99.8+random()*.18,
+    });
+    added++;
   }
 }

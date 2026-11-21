@@ -1,7 +1,7 @@
 import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-18';
 import {pointAt} from './kolam.js?v=20261121-pixel-trace-18';
 import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-18';
-import {addSamyuktaFaceDetails} from './samyukta-easter-egg.js?v=20261121-samyukta-mouth-2';
+import {addSamyuktaFaceDetails} from './samyukta-easter-egg.js?v=20261121-samyukta-mouth-3';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
