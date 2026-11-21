@@ -1,6 +1,6 @@
-import {constructKolam} from './kolam.js?v=20261121-pixel-trace-7';
-import {createFlour,advanceFlour} from './flour.js?v=20261121-pixel-trace-7';
-import {createAnts,stepAnts} from './ants.js?v=20261121-pixel-trace-7';
+import {constructKolam} from './kolam.js?v=20261121-pixel-trace-8';
+import {createFlour,advanceFlour} from './flour.js?v=20261121-pixel-trace-8';
+import {createAnts,stepAnts} from './ants.js?v=20261121-pixel-trace-8';
 
 export const drawingDuration=42;
 

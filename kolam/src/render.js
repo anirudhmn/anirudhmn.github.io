@@ -1,5 +1,5 @@
-import {randomFromSeed} from './random.js?v=20261121-pixel-trace-7';
-import {resolution} from './flour.js?v=20261121-pixel-trace-7';
+import {randomFromSeed} from './random.js?v=20261121-pixel-trace-8';
+import {resolution} from './flour.js?v=20261121-pixel-trace-8';
 export function createRenderer(canvas,path){
   const ground=document.createElement('canvas'),powder=document.createElement('canvas');
   const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d');
@@ -50,7 +50,7 @@ export function createRenderer(canvas,path){
   function drawAnt(ant){
     if(ant.mode==='resting')return;
     c.save();c.translate(cx+ant.x*scale,cy+ant.y*scale);c.rotate(ant.angle);
-    const size=Math.max(18,scale*.22)*(ant.scale||1),stride=ant.mode==='feeding'?0:Math.sin(ant.gait);
+    const size=Math.max(14,scale*.18)*(ant.scale||1),stride=ant.mode==='feeding'?0:Math.sin(ant.gait);
     c.lineCap='round';c.lineJoin='round';
     // Six long, jointed legs sit behind the body so they remain easy to read.
     for(let side=-1;side<=1;side+=2)for(let leg=0;leg<3;leg++){

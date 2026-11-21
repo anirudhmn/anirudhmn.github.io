@@ -1,4 +1,4 @@
-import {mountKolam} from './playback.js?v=20261121-pixel-trace-7';
+import {mountKolam} from './playback.js?v=20261121-pixel-trace-8';
 
 const canvas=document.querySelector('canvas');
 const menu=document.querySelector('#menu');
