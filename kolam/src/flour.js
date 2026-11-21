@@ -1,6 +1,6 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-16';
-import {pointAt} from './kolam.js?v=20261121-pixel-trace-16';
-import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-16';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-17';
+import {pointAt} from './kolam.js?v=20261121-pixel-trace-17';
+import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-17';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -101,10 +101,10 @@ function createEasterEggFlour(path){
     addFeatureStroke([{x:637,y:926},{x:646,y:929},{x:655,y:927}], 'shadow', .0035, 2.2);
 
     // Softly filled upper and lower lips with a defined center seam.
-    const lipHalfWidth=108;
-    for(let ix=-108;ix<=108;ix+=1.65){
+    const lipHalfWidth=120;
+    for(let ix=-120;ix<=120;ix+=1.65){
       const t=ix/lipHalfWidth,edge=Math.abs(t),x=626+ix;
-      const upper=1035+15*edge*edge, seam=1060+10*edge, lower=1120-50*edge;
+      const upper=1053+15*edge*edge, seam=1078+10*edge, lower=1138-50*edge;
       for(let y=upper;y<=lower;y+=1.7){
         if(Math.abs(y-seam)<1.5)continue;
         const jitterX=(revealRandom()-.5)*1.2,jitterY=(revealRandom()-.5)*1.2;

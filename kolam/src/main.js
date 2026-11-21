@@ -1,4 +1,4 @@
-import {mountKolam} from './playback.js?v=20261121-portrait-features';
+import {mountKolam} from './playback.js?v=20261121-1000-ant-load';
 
 const canvas=document.querySelector('canvas');
 const menu=document.querySelector('#menu');
