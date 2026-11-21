@@ -1,4 +1,4 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261124';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-flourishes';
 const TAU=Math.PI*2,opening=Math.PI/4-.055;
 
 // X crossing, D uncrossed join, B unjoined loops. This selects a single-strand
@@ -31,12 +31,12 @@ export function constructKolam(seed='4',family) {
     });
     if(bonds.filter(b=>b.type==='X').length<candidates.length*.5)continue;
     const path=assemble(dots,radius,bonds,{layout,flourish,size});
-    if(path)return {...path,seed:String(seed),size,layout,symmetry,bonds,radius};
+    if(path)return {...path,seed:String(seed),size,layout,symmetry,bonds,radius,flourish};
   }
   const bonds=candidates.map(c=>({...c,type:c.angle===0||dots[c.a].x===0?'X':'B'}));
   const path=assemble(dots,radius,bonds,{layout,flourish,size});
   if(!path)throw new Error('Could not construct a closed kolam');
-  return {...path,seed:String(seed),size,layout,symmetry,bonds,radius};
+  return {...path,seed:String(seed),size,layout,symmetry,bonds,radius,flourish};
 }
 function assemble(positions,radius,bonds,design) {
   const dots=positions.map(p=>({...p,cuts:[]})),joins=[],ports=[],edges=[];
@@ -56,12 +56,12 @@ function assemble(positions,radius,bonds,design) {
     for(let i=0;i<dot.cuts.length;i++){
       const start=dot.cuts[i],end=dot.cuts[(i+1)%dot.cuts.length],a=start.angle+opening;
       let b=end.angle-opening;while(b<=a)b+=TAU;
-      const corner=design.flourish==='rounds'&&isCorner(dot,design.layout,(design.size-1)/2),outward=Math.atan2(dot.y,dot.x);
-      const count=Math.ceil((b-a)*28),points=Array.from({length:count+1},(_,j)=>{
-        const angle=a+(b-a)*j/count,delta=Math.atan2(Math.sin(angle-outward),Math.cos(angle-outward));
-        const r=radius+(corner ? .105*Math.pow(Math.max(0,Math.cos(delta)),6) : 0);
-        return {x:dot.x+r*Math.cos(angle),y:dot.y+r*Math.sin(angle)};
-      });
+      const corner=design.flourish==='corner-petal'&&isCorner(dot,design.layout,(design.size-1)/2),outward=Math.atan2(dot.y,dot.x);
+      let outwardAngle=outward;while(outwardAngle<a)outwardAngle+=TAU;
+      const turnsAtCorner=corner&&outwardAngle<=b;
+      const count=Math.ceil((b-a)*28),points=turnsAtCorner
+        ?cornerPetalArc(dot,radius,a,b,outward)
+        :Array.from({length:count+1},(_,j)=>{const angle=a+(b-a)*j/count;return {x:dot.x+radius*Math.cos(angle),y:dot.y+radius*Math.sin(angle)};});
       edge(start.plus,end.minus,points);
     }
   }
@@ -87,6 +87,22 @@ function assemble(positions,radius,bonds,design) {
 }
 function isCorner(dot,layout,half){
   return layout==='square'?Math.abs(dot.x)===half&&Math.abs(dot.y)===half:Math.abs(dot.x)+Math.abs(dot.y)===half;
+}
+function bezierPoints(a,b,c,d,steps=48){
+  return Array.from({length:steps+1},(_,i)=>{const t=i/steps,u=1-t;return {x:u*u*u*a.x+3*u*u*t*b.x+3*u*t*t*c.x+t*t*t*d.x,y:u*u*u*a.y+3*u*u*t*b.y+3*u*t*t*c.y+t*t*t*d.y};});
+}
+function cornerPetalArc(dot,radius,startAngle,endAngle,outward,length=.66){
+  let start={x:dot.x+radius*Math.cos(startAngle),y:dot.y+radius*Math.sin(startAngle)};
+  let end={x:dot.x+radius*Math.cos(endAngle),y:dot.y+radius*Math.sin(endAngle)},a=startAngle,b=endAngle,reverse=false;
+  const side={x:-Math.sin(outward),y:Math.cos(outward)};
+  const startSide=(start.x-dot.x)*side.x+(start.y-dot.y)*side.y,endSide=(end.x-dot.x)*side.x+(end.y-dot.y)*side.y;
+  if(startSide>endSide){[start,end]=[end,start];[a,b]=[b,a];reverse=true;}
+  const forward={x:Math.cos(outward),y:Math.sin(outward)},tip={x:dot.x+forward.x*(radius+length),y:dot.y+forward.y*(radius+length)};
+  const tangentA={x:-Math.sin(a),y:Math.cos(a)},tangentB={x:-Math.sin(b),y:Math.cos(b)},tipHandle=.24;
+  const left=bezierPoints(start,{x:start.x+tangentA.x*.20,y:start.y+tangentA.y*.20},{x:tip.x-side.x*tipHandle,y:tip.y-side.y*tipHandle},tip);
+  const right=bezierPoints(tip,{x:tip.x-side.x*tipHandle,y:tip.y-side.y*tipHandle},{x:end.x-tangentB.x*.20,y:end.y-tangentB.y*.20},end);
+  const points=[...left,...right.slice(1)];
+  return reverse?points.reverse():points;
 }
 export function pointAt(path,distance){
   const points=path.points;let low=1,high=points.length-1;

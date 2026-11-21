@@ -1,4 +1,4 @@
-import {mountKolam} from './playback.js?v=20261124';
+import {mountKolam} from './playback.js?v=20261120-flourishes';
 
 const canvas=document.querySelector('canvas');
 const menu=document.querySelector('#menu');

@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kolam gallery preview</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101614;color:#eee7d4;font:14px system-ui,sans-serif;padding:28px}header{max-width:1100px;margin:0 auto 22px}h1{font:500 26px Georgia,serif;margin:0 0 6px}p{color:#aaa897;margin:0}.grid{max-width:1100px;margin:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{background:#171e1b;border:1px solid #ffffff12;border-radius:12px;overflow:hidden}.card canvas{width:100%;aspect-ratio:1;display:block}.label{padding:10px 13px 12px;color:#d7d0bd;font-size:12px}.label b{font-weight:550;color:#f1e8d2}.label span{color:#aaa897}@media(max-width:750px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:480px){.grid{grid-template-columns:1fr}}
+</style>
+<header><h1>Kolam studies</h1><p>Seed-generated finished patterns · each card shows the variation chosen by its seed</p></header><div id="grid" class="grid"></div>
+<script type="module">
+import {constructKolam} from './src/kolam.js';import {createFlour} from './src/flour.js';import {accentsForSeed} from './src/random.js';
+const grid=document.querySelector('#grid'),seen=new Set(),items=[];
+for(let i=0;i<1000&&items.length<9;i++){
+ const seed=`gallery-${i*137+53}`,path=constructKolam(seed),flour=createFlour(path),acc=accentsForSeed(seed);
+ const coloredDots=new Set(flour.grains.filter(g=>g.pigment).map(g=>`${Math.round(g.x*100)},${Math.round(g.y*100)}`)).size;
+ const color=flour.grains.some(g=>g.pigment),signature=[path.layout,path.size,color?1:0,acc.flourish||'none'].join('-');
+ if(seen.has(signature))continue;seen.add(signature);items.push({seed,path,flour,acc,color});
+}
+const names={curl:'curling kolam',leaf:'leaf loops','corner-petal':'single petal turning corner'};
+for(const {seed,path,flour,acc,color} of items){
+ const card=document.createElement('article');card.className='card';const canvas=document.createElement('canvas');canvas.width=320;canvas.height=320;card.append(canvas);
+ const label=document.createElement('div');label.className='label';label.innerHTML=`<b>${path.size} × ${path.size} ${path.layout==='diamond'?'diamond':'square'}</b><br><span>${color?'red + yellow dots':'plain dots'} · ${names[acc.flourish]||'no flourish'} · seed ${seed}</span>`;card.append(label);grid.append(card);
+ const c=canvas.getContext('2d'),cx=160,cy=146,scale=205/(path.size+(acc.flourish&&acc.flourish!=='corner-petal'?2.4:1.4));c.fillStyle='#171c1a';c.fillRect(0,0,320,320);
+ const halo=c.createRadialGradient(cx,cy,0,cx,cy,180);halo.addColorStop(0,'rgba(132,112,76,.17)');halo.addColorStop(1,'rgba(17,24,23,0)');c.fillStyle=halo;c.fillRect(0,0,320,320);
+ for(const g of flour.grains){let color;if(g.pigment==='vermillion')color=g.shade<.5?'rgba(196,54,37,.88)':'rgba(225,70,48,.96)';else if(g.pigment==='marigold')color=g.shade<.5?'rgba(208,151,25,.88)':'rgba(244,192,45,.98)';else color=g.shade<.16?'rgba(175,174,151,.42)':g.shade<.65?'rgba(231,225,202,.70)':'rgba(251,244,220,.83)';c.fillStyle=color;c.beginPath();c.ellipse(cx+g.x*scale,cy+g.y*scale,Math.max(.5,g.radius*scale),Math.max(.5,g.radius*scale*.72),g.shade*3,0,Math.PI*2);c.fill();}
+}
+</script>

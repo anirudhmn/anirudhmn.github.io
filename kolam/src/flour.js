@@ -1,5 +1,5 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261124';
-import {pointAt} from './kolam.js?v=20261124';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261120-flourishes';
+import {pointAt} from './kolam.js?v=20261120-flourishes';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -10,10 +10,34 @@ function bezier(a,b,c,d,steps=32){
 }
 function petalStroke(x,y,angle,length,width){
   const dx=Math.cos(angle),dy=Math.sin(angle),nx=-dy,ny=dx;
-  const left={x:x-nx*width,y:y-ny*width},tip={x:x+dx*length,y:y+dy*length},right={x:x+nx*width,y:y+ny*width};
-  const first=bezier(left,{x:x+dx*length*.35-nx*width*1.4,y:y+dy*length*.35-ny*width*1.4},{x:tip.x-dx*length*.22-nx*width*.65,y:tip.y-dy*length*.22-ny*width*.65},tip);
-  const second=bezier(tip,{x:tip.x-dx*length*.22+nx*width*.65,y:tip.y-dy*length*.22+ny*width*.65},{x:x+dx*length*.35+nx*width*1.4,y:y+dy*length*.35+ny*width*1.4},right);
-  return [...first,...second.slice(1),left];
+  const base={x,y},tip={x:x+dx*length,y:y+dy*length};
+  const first=bezier(base,{x:x+dx*length*.32-nx*width*1.8,y:y+dy*length*.32-ny*width*1.8},{x:tip.x-dx*length*.2-nx*width*.72,y:tip.y-dy*length*.2-ny*width*.72},tip,56);
+  const second=bezier(tip,{x:tip.x-dx*length*.2+nx*width*.72,y:tip.y-dy*length*.2+ny*width*.72},{x:x+dx*length*.32+nx*width*1.8,y:y+dy*length*.32+ny*width*1.8},base,56);
+  return [...first,...second.slice(1)];
+}
+function curlStroke(x,y,angle,length,side=1){
+  const dx=Math.cos(angle),dy=Math.sin(angle),nx=-dy*side,ny=dx*side;
+  const cx=x+dx*length*.78+nx*length*.34,cy=y+dy*length*.78+ny*length*.34;
+  const radius=.20;
+  const start={x:cx+nx*radius,y:cy+ny*radius};
+  const stem=bezier({x,y},{x:x+dx*length*.42+nx*length*.04,y:y+dy*length*.42+ny*length*.04},{x:cx-dx*length*.24+nx*radius,y:cy-dy*length*.24+ny*radius},start,64);
+  const spiral=[];
+  for(let i=0;i<=112;i++){
+    const t=i/112,theta=side*(Math.PI*2.15)*t+Math.PI/2,r=radius*(1-t)+.008;
+    spiral.push({x:cx+r*Math.cos(theta),y:cy+r*Math.sin(theta)});
+  }
+  return [...stem,...spiral.slice(1)];
+}
+function flourishStrokes(x,y,angle,kind){
+  const petal=(spread,length,width)=>petalStroke(x,y,angle+spread,length,width);
+  if(kind==='curl')return [
+    petal(-.88,.62,.14),petal(.36,1.00,.19),petal(1.30,.70,.15),
+    curlStroke(x,y,angle-1.72,.94,-1),curlStroke(x,y,angle+.84,.98,1),
+  ];
+  if(kind==='leaf')return [
+    petal(-.96,.72,.15),petal(-.10,1.02,.19),petal(.78,.84,.15),
+  ];
+  return [];
 }
 function addStrokeGrains(grains,points,random,offset){
   const cumulative=[0];
@@ -39,8 +63,10 @@ export function createFlour(path){
       dotColors.set(key,selected);
     }
     for(let i=0;i<150;i++){
-      const a=random()*Math.PI*2,r=Math.sqrt(random())*.043,selected=dotColors.get(key);
-      const pigment=selected?(r<.019?'vermillion':'marigold'):null;
+      // Colored dots keep the same red center footprint as a plain dot, then
+      // add a yellow ring of equal thickness around it.
+      const a=random()*Math.PI*2,selected=dotColors.get(key),r=Math.sqrt(random())*(selected ? .086 : .043);
+      const pigment=selected?(r<.043?'vermillion':'marigold'):null;
       grains.push({x:dot.x+Math.cos(a)*r,y:dot.y+Math.sin(a)*r,radius:.003+random()*.004,shade:random(),pigment,distance:-1});
     }
   }
@@ -52,17 +78,16 @@ export function createFlour(path){
     grains.push({x:p.x-Math.sin(a)*scatter+(random()-.5)*.012,y:p.y+Math.cos(a)*scatter+(random()-.5)*.012,radius:(.002+random()*.0045)*flow,shade:random(),distance});
   }
   let drawLength=path.length;
-  if(flourish==='petals'||flourish==='leaves'){
+  if(flourish&&flourish!=='corner-petal'){
     const half=(path.size-1)/2;
     const corners=path.layout==='square'?[[-half,-half],[-half,half],[half,-half],[half,half]]:[[0,-half],[-half,0],[half,0],[0,half]];
-    const spreads=flourish==='petals'?[-.43,0,.43]:[-.31,.31];
-    const length=flourish==='petals' ? .34 : .43,width=flourish==='petals' ? .055 : .042;
     for(const [x,y] of corners){
-      const angle=Math.atan2(y,x),rootX=x+Math.cos(angle)*(path.radius+.055),rootY=y+Math.sin(angle)*(path.radius+.055);
-      for(const spread of spreads)drawLength=addStrokeGrains(grains,petalStroke(rootX,rootY,angle+spread,length,width),random,drawLength);
+      const angle=Math.atan2(y,x),rootX=x+Math.cos(angle)*(path.radius+1),rootY=y+Math.sin(angle)*(path.radius+1);
+      for(const stroke of flourishStrokes(rootX,rootY,angle,flourish))drawLength=addStrokeGrains(grains,stroke,random,drawLength);
     }
   }
-  return {grains,extent:path.size+1,drawLength,deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
+  const extentMargin=flourish==='corner-petal'?2.4:flourish?3:1;
+  return {grains,extent:path.size+extentMargin,drawLength,deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
 }
 export function advanceFlour(flour,distance){
   while(flour.deposited<flour.grains.length&&flour.grains[flour.deposited].distance<=distance){

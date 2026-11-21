@@ -1,5 +1,5 @@
-import {randomFromSeed} from './random.js?v=20261124';
-import {resolution} from './flour.js?v=20261124';
+import {randomFromSeed} from './random.js?v=20261120-flourishes';
+import {resolution} from './flour.js?v=20261120-flourishes';
 export function createRenderer(canvas,path){
   const ground=document.createElement('canvas'),powder=document.createElement('canvas');
   const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d');
@@ -7,7 +7,8 @@ export function createRenderer(canvas,path){
   function resize(){
     width=window.innerWidth;height=window.innerHeight;const ratio=Math.min(devicePixelRatio||1,2);
     for(const surface of [canvas,ground,powder]){surface.width=Math.round(width*ratio);surface.height=Math.round(height*ratio);surface.getContext('2d').setTransform(ratio,0,0,ratio,0,0);}
-    scale=Math.min(width*.78,height*.75)/(path.size-.1);cx=width/2;cy=height*.51;drawn=0;removed=0;
+    const flourishMargin=path.flourish==='corner-petal'?1.4:path.flourish?2.4:0;
+    scale=Math.min(width*.78,height*.75)/(path.size-.1+flourishMargin);cx=width/2;cy=height*.51;drawn=0;removed=0;
     const random=randomFromSeed(`${path.seed}:ground`);
     const base=g.createLinearGradient(0,0,width,height);
     base.addColorStop(0,'#1b211e');base.addColorStop(.52,'#171c1a');base.addColorStop(1,'#111817');
