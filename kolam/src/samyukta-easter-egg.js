@@ -16,17 +16,22 @@ export function addSamyuktaFaceDetails(grains,world,random){
   addStroke([{x:630,y:860},{x:636,y:883},{x:642,y:902},{x:654,y:912},{x:663,y:915},{x:655,y:922},{x:643,y:922}], 'shadow', .0042, 2.4);
   addStroke([{x:637,y:926},{x:646,y:929},{x:655,y:927}], 'shadow', .0035, 2.2);
 
-  // Fill the complete shaded lip silhouette. Dense, overlapping grains keep
-  // the red continuous while the narrow center gap preserves the lip shape.
-  const halfWidth=132,step=.85;
+  // Fill the raster's lip section (approximately x=559..651, y=561..593).
+  // The upper and lower curves follow a soft cupid's bow and rounded lower lip;
+  // keep only a very fine mouth seam so the red flour covers the full lip area.
+  const centerX=605,halfWidth=47,step=.72;
   for(let ix=-halfWidth;ix<=halfWidth;ix+=step){
-    const t=ix/halfWidth,edge=Math.abs(t),x=626+ix;
-    const upper=1040+20*edge*edge,seam=1073+12*edge,lower=1146-52*edge;
+    const t=ix/halfWidth,edge=Math.abs(t),x=centerX+ix;
+    const upper=562+11*edge*edge-2.2*Math.exp(-(((edge-.22)/.16)**2));
+    const seam=576+2.8*edge;
+    const lower=589-12*edge*edge;
     for(let y=upper;y<=lower;y+=step){
-      if(Math.abs(y-seam)<1.15)continue;
+      // A narrow, slightly irregular seam gives the two lips definition without
+      // leaving the broad unfloured gap that was visible in the previous fill.
+      if(Math.abs(y-seam)<.72)continue;
       grains.push({
-        x:world(x+(random()-.5)*.34),
-        y:world(y+(random()-.5)*.34),
+        x:world(x+(random()-.5)*.32),
+        y:world(y+(random()-.5)*.32),
         radius:.0048+random()*.0028,
         shade:.45+random()*.1,
         pigment:'lipRed',
