@@ -1,6 +1,6 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-11';
-import {pointAt} from './kolam.js?v=20261121-pixel-trace-11';
-import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-11';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-15';
+import {pointAt} from './kolam.js?v=20261121-pixel-trace-15';
+import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-15';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -76,10 +76,22 @@ function createEasterEggFlour(path){
     const patchProgress=tileReveal.get(tile),grainProgress=revealRandom();
     grains.push({
       x:world(x),y:world(y),
-      radius:kind===3?.003+.004*shade:kind===0?.0045+.006*shade:.006+.005*shade,
-      shade,pigment:kind===1?'vermillion':kind===2?'marigold':kind===4?'rose':kind===5?'roseLight':undefined,
+      radius:kind===3?.003+.004*shade:kind===0?.0045+.006*shade:kind===4?.003+.003*shade:.006+.005*shade,
+      shade,pigment:kind===1||kind===4?'vermillion':kind===2?'marigold':undefined,
       distance:(patchProgress*.84+grainProgress*.16)*drawLength,
     });
+  }
+  // A restrained warm shadow just outside the lower-right edge of the traced
+  // nose gives the outline a little depth without obscuring the flour line.
+  if(path.easterEgg==='samyukta'){
+    const shadow=[{x:570,y:508},{x:572,y:516},{x:571,y:525},{x:568,y:534},{x:563,y:541},{x:556,y:546},{x:549,y:548}];
+    for(let segment=1;segment<shadow.length;segment++){
+      const a=shadow[segment-1],b=shadow[segment],length=Math.hypot(b.x-a.x,b.y-a.y),count=Math.ceil(length*1.15);
+      for(let i=0;i<count;i++){
+        const t=i/count,x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;
+        grains.push({x:world(x),y:world(y),radius:.0032+revealRandom()*.0018,shade:.34+revealRandom()*.18,pigment:'shadow',distance:100+revealRandom()*.2});
+      }
+    }
   }
   grains.sort((a,b)=>a.distance-b.distance);
   return {grains,extent:path.extent,drawLength,drawDuration:60,accentStyle:'easter-egg',deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
