@@ -1,5 +1,5 @@
-import {randomFromSeed} from './random.js?v=20261121-easter-eggs';
-import {resolution} from './flour.js?v=20261121-easter-eggs';
+import {randomFromSeed} from './random.js?v=20261121-pixel-trace-6';
+import {resolution} from './flour.js?v=20261121-pixel-trace-6';
 export function createRenderer(canvas,path){
   const ground=document.createElement('canvas'),powder=document.createElement('canvas');
   const c=canvas.getContext('2d'),g=ground.getContext('2d'),f=powder.getContext('2d');
@@ -9,7 +9,7 @@ export function createRenderer(canvas,path){
     width=Math.max(1,bounds.width||window.innerWidth);height=Math.max(1,bounds.height||window.innerHeight);const ratio=Math.min(devicePixelRatio||1,2);
     for(const surface of [canvas,ground,powder]){surface.width=Math.round(width*ratio);surface.height=Math.round(height*ratio);surface.getContext('2d').setTransform(ratio,0,0,ratio,0,0);}
     const flourishMargin=path.flourish==='corner-petal'?1.4:path.flourish?2.4:0;
-    scale=Math.min(width*.78,height*.75)/(path.size-.1+flourishMargin);cx=width/2;cy=height*.51;drawn=0;removed=0;
+    scale=Math.min(width*.92,height*.90)/(path.size-.1+flourishMargin);cx=width/2;cy=height*.50;drawn=0;removed=0;
     const random=randomFromSeed(`${path.seed}:ground`);
     const base=g.createLinearGradient(0,0,width,height);
     base.addColorStop(0,'#1b211e');base.addColorStop(.52,'#171c1a');base.addColorStop(1,'#111817');
@@ -50,29 +50,49 @@ export function createRenderer(canvas,path){
   function drawAnt(ant){
     if(ant.mode==='resting')return;
     c.save();c.translate(cx+ant.x*scale,cy+ant.y*scale);c.rotate(ant.angle);
-    const size=Math.max(8.5,scale*.115)*(ant.scale||1),stride=ant.mode==='feeding'?0:Math.sin(ant.gait);
-    c.lineCap='round';c.lineJoin='round';c.strokeStyle='rgba(35,24,17,.9)';c.lineWidth=Math.max(.75,size*.075);c.beginPath();
+    const size=Math.max(18,scale*.22)*(ant.scale||1),stride=ant.mode==='feeding'?0:Math.sin(ant.gait);
+    c.lineCap='round';c.lineJoin='round';
+    // Six long, jointed legs sit behind the body so they remain easy to read.
     for(let side=-1;side<=1;side+=2)for(let leg=0;leg<3;leg++){
-      const x=[-.04,.04,.15][leg]*size,swing=stride*(leg===1?-1:1)*side*size*.095;
-      c.moveTo(x,side*size*.015);
-      c.lineTo(x+size*(leg===2?.03:-.02)+swing,side*size*.20);
-      c.lineTo(x+size*(leg===0?-.17:leg===1?.17:.24)+swing,side*size*.34);
+      const hip=[-.17,.015,.17][leg]*size,swing=stride*(leg===1?-1:1)*side*size*.11;
+      const kneeX=hip+[-.11,.02,.12][leg]*size+swing*.45;
+      const footX=hip+[-.29,.02,.32][leg]*size+swing;
+      c.strokeStyle='rgba(36,22,15,.98)';c.lineWidth=Math.max(1.5,size*.085);c.beginPath();
+      c.moveTo(hip,side*.035*size);c.lineTo(kneeX,side*.30*size);c.lineTo(footX,side*.54*size);c.stroke();
+      c.strokeStyle='rgba(184,126,78,.95)';c.lineWidth=Math.max(.7,size*.028);c.beginPath();
+      c.moveTo(hip,side*.04*size);c.lineTo(kneeX,side*.30*size);c.lineTo(footX,side*.53*size);c.stroke();
     }
+    // Three distinct, warm brown body segments with a soft rim highlight.
+    c.fillStyle='#351b12';c.strokeStyle='#b77c4e';c.lineWidth=Math.max(.8,size*.035);
+    c.beginPath();c.ellipse(-.30*size,0,.235*size,.175*size,-.06,0,Math.PI*2);c.fill();c.stroke();
+    c.fillStyle='#5b3020';c.beginPath();c.ellipse(-.015*size,0,.125*size,.115*size,0,0,Math.PI*2);c.fill();c.stroke();
+    c.fillStyle='#402116';c.beginPath();c.ellipse(.245*size,0,.175*size,.155*size,.02,0,Math.PI*2);c.fill();c.stroke();
+    c.fillStyle='rgba(245,190,126,.68)';c.beginPath();c.ellipse(-.36*size,-.07*size,.12*size,.04*size,-.12,0,Math.PI*2);c.fill();
+    // Two curved antennae and short mandibles mark the head at the front.
+    c.strokeStyle='#e0ad78';c.lineWidth=Math.max(1,size*.045);c.beginPath();
+    c.moveTo(.34*size,-.075*size);c.quadraticCurveTo(.48*size,-.30*size,.66*size,-.26*size);
+    c.moveTo(.34*size,.075*size);c.quadraticCurveTo(.48*size,.30*size,.66*size,.26*size);
     c.stroke();
-    c.fillStyle='#221a15';c.strokeStyle='rgba(196,147,93,.72)';c.lineWidth=Math.max(.45,size*.045);
-    c.beginPath();c.ellipse(-.25*size,0,.205*size,.145*size,-.04,0,Math.PI*2);c.fill();c.stroke();
-    c.fillStyle='#38251a';c.beginPath();c.ellipse(.015*size,0,.105*size,.09*size,0,0,Math.PI*2);c.fill();c.stroke();
-    c.fillStyle='#241a14';c.beginPath();c.ellipse(.285*size,0,.145*size,.13*size,0,0,Math.PI*2);c.fill();c.stroke();
-    c.fillStyle='rgba(235,194,134,.55)';c.beginPath();c.ellipse(-.29*size,-.055*size,.105*size,.035*size,-.12,0,Math.PI*2);c.fill();
-    c.strokeStyle='rgba(217,180,130,.85)';c.lineWidth=Math.max(.45,size*.04);c.beginPath();
-    c.moveTo(.36*size,-.065*size);c.quadraticCurveTo(.51*size,-.22*size,.46*size,-.30*size);
-    c.moveTo(.36*size,.065*size);c.quadraticCurveTo(.51*size,.22*size,.46*size,.30*size);
-    c.moveTo(.39*size,-.045*size);c.lineTo(.45*size,-.075*size);c.moveTo(.39*size,.045*size);c.lineTo(.45*size,.075*size);c.stroke();
-    if(ant.payload.length){const parcel=Math.min(1,ant.payload.length/60);c.fillStyle='#eee7cf';c.beginPath();c.ellipse(.47*size,0,.10*size*parcel,.09*size*parcel,.2,0,Math.PI*2);c.fill();}
+    c.strokeStyle='#27170f';c.lineWidth=Math.max(.8,size*.04);c.beginPath();
+    c.moveTo(.38*size,-.055*size);c.lineTo(.49*size,-.13*size);c.moveTo(.38*size,.055*size);c.lineTo(.49*size,.13*size);c.stroke();
+    // The collected flour rides at the mandibles; it stays attached to the ant.
+    if(ant.payload.length){
+      const parcel=Math.min(1,Math.max(.65,ant.payload.length/24));
+      c.fillStyle='rgba(20,15,11,.7)';c.beginPath();c.ellipse(.52*size,.015*size,.205*size*parcel,.155*size*parcel,.15,0,Math.PI*2);c.fill();
+      c.fillStyle='#f3ecd6';c.strokeStyle='#fff8e7';c.lineWidth=Math.max(.6,size*.025);
+      c.beginPath();c.ellipse(.54*size,-.005*size,.18*size*parcel,.13*size*parcel,.15,0,Math.PI*2);c.fill();c.stroke();
+      c.fillStyle='#fff9e9';
+      for(const [x,y,r] of [[.47,-.10,.045],[.58,.075,.038],[.63,-.055,.03]]){c.beginPath();c.arc(x*size,y*size,r*size,0,Math.PI*2);c.fill();}
+    }
     c.restore();
   }
   function draw(day){
     const {flour,ants}=day;
+    if(!ants.edgeInitialized){
+      ants.nest={x:-width/(2*scale)+Math.max(10/scale,.035),y:(height/2-cy)/scale};
+      for(const ant of ants.ants){ant.x=ants.nest.x;ant.y=ants.nest.y;ant.angle=0;ant.entryAngle=0;}
+      ants.edgeInitialized=true;
+    }
     if(drawn===0)removed=flour.removed.length;
     for(;drawn<flour.deposited;drawn++)drawGrain(flour.grains[drawn]);
     redrawRemoved(flour);c.clearRect(0,0,width,height);c.drawImage(ground,0,0,width,height);c.drawImage(powder,0,0,width,height);

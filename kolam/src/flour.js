@@ -1,5 +1,6 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-easter-eggs';
-import {pointAt} from './kolam.js?v=20261121-easter-eggs';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-6';
+import {pointAt} from './kolam.js?v=20261121-pixel-trace-6';
+import {rasterEasterEggs} from './easter-egg-raster-data.js?v=20261121-pixel-trace-6';
 export const resolution=256;
 export function cellAt(flour,x,y){
   const col=Math.floor((x/flour.extent+.5)*resolution),row=Math.floor((y/flour.extent+.5)*resolution);
@@ -52,49 +53,48 @@ function addStrokeGrains(grains,points,random,offset){
   }
   return offset+length;
 }
+function keepPetalOutsideDot(points,dot,radius,clearance=.035){
+  return points.map((point,index)=>{
+    if(index===0||index===points.length-1)return point;
+    const dx=point.x-dot.x,dy=point.y-dot.y,distance=Math.hypot(dx,dy),minimum=radius+clearance;
+    if(distance>=minimum)return point;
+    const angle=Math.atan2(dy,dx);
+    return {x:dot.x+Math.cos(angle)*minimum,y:dot.y+Math.sin(angle)*minimum};
+  });
+}
 function createEasterEggFlour(path){
-  const random=randomFromSeed(`${path.seed}:easter-flour`),grains=[];
-  for(const dot of path.dots){
-    for(let i=0;i<150;i++){
-      const angle=random()*Math.PI*2,r=Math.sqrt(random())*dot.radius;
-      grains.push({x:dot.x+Math.cos(angle)*r,y:dot.y+Math.sin(angle)*r,radius:.0028+random()*.0038,shade:random(),distance:-1});
-    }
+  const encoded=rasterEasterEggs[path.easterEgg];
+  if(!encoded)throw new Error(`Missing pixel trace for ${path.easterEgg}`);
+  const binary=Uint8Array.from(atob(encoded),char=>char.charCodeAt(0));
+  const pixels=1254,sourceExtent=10.8,world=value=>(value/(pixels-1)-.5)*sourceExtent;
+  const grains=[];let drawLength=100;
+  for(let i=0;i<binary.length;i+=6){
+    const x=binary[i]|binary[i+1]<<8,y=binary[i+2]|binary[i+3]<<8,shade=binary[i+4]/255,kind=binary[i+5];
+    grains.push({
+      x:world(x),y:world(y),
+      radius:kind===3?.003+.004*shade:kind===0?.0045+.006*shade:.006+.005*shade,
+      shade,pigment:kind===1?'vermillion':kind===2?'marigold':undefined,
+      distance:((y*pixels+x)/(pixels*pixels))*drawLength,
+    });
   }
-  for(const dot of path.accentDots){
-    for(let i=0;i<300;i++){
-      const angle=random()*Math.PI*2,r=Math.sqrt(random())*dot.radius;
-      const pigment=dot.color==='vermillion'&&dot.ring!==false&&r>=dot.radius*.5?'marigold':dot.color;
-      grains.push({x:dot.x+Math.cos(angle)*r,y:dot.y+Math.sin(angle)*r,radius:.0032+random()*.0045,shade:random(),pigment,distance:-1});
-    }
-  }
-  let drawLength=0;
-  for(const stroke of path.strokes){
-    const cumulative=[0];
-    for(let i=1;i<stroke.length;i++)cumulative.push(cumulative[i-1]+Math.hypot(stroke[i].x-stroke[i-1].x,stroke[i].y-stroke[i-1].y));
-    const length=cumulative[cumulative.length-1],count=Math.ceil(length*300);
-    for(let i=0;i<count;i++){
-      const distance=length*i/count;let index=1;
-      while(index<cumulative.length-1&&cumulative[index]<distance)index++;
-      const a=stroke[index-1],b=stroke[index],span=cumulative[index]-cumulative[index-1],t=span?(distance-cumulative[index-1])/span:0;
-      const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t,angle=Math.atan2(b.y-a.y,b.x-a.x);
-      const flow=1+.16*Math.sin(distance*3.1),scatter=(random()+random()+random()-1.5)*.010*flow;
-      grains.push({x:x-Math.sin(angle)*scatter+(random()-.5)*.006,y:y+Math.cos(angle)*scatter+(random()-.5)*.006,radius:(.005+random()*.009)*flow,shade:random(),distance:drawLength+distance});
-    }
-    drawLength+=length;
-  }
+  grains.sort((a,b)=>a.distance-b.distance);
   return {grains,extent:path.extent,drawLength,accentStyle:'easter-egg',deposited:0,totalQuantity:0,field:new Float32Array(resolution**2),cells:new Map(),removed:[]};
 }
 export function createFlour(path){
   if(path.easterEgg)return createEasterEggFlour(path);
   const random=randomFromSeed(`${path.seed}:flour`),grains=[];
-  const {color,flourish}=accentsForSeed(path.seed),style=color?['center','scattered','tips','all'][Math.floor(random()*4)]:'none',dotColors=new Map();
+  const {color,flourish}=accentsForSeed(path.seed),style=color?['center','scattered','tips'][Math.floor(random()*3)]:'none',dotColors=new Map(),dotRepresentatives=new Map();
+  for(const dot of path.dots){
+    const key=[Math.abs(dot.x),Math.abs(dot.y)].sort((a,b)=>a-b).join(':');
+    if(!dotRepresentatives.has(key))dotRepresentatives.set(key,dot);
+  }
+  for(const [key,dot] of dotRepresentatives){
+    const half=(path.size-1)/2,isTip=path.layout==='square'?Math.abs(dot.x)===half&&Math.abs(dot.y)===half:Math.abs(dot.x)+Math.abs(dot.y)===half;
+    dotColors.set(key,(style==='center'&&dot.x===0&&dot.y===0)||(style==='tips'&&isTip)||(style==='scattered'&&random()<.34));
+  }
+  if(dotColors.size>0&&[...dotColors.values()].every(Boolean))dotColors.set(dotColors.keys().next().value,false);
   for(const dot of path.dots){
     const pair=[Math.abs(dot.x),Math.abs(dot.y)].sort((a,b)=>a-b),key=pair.join(':');
-    if(!dotColors.has(key)){
-      const half=(path.size-1)/2,isTip=path.layout==='square'?Math.abs(dot.x)===half&&Math.abs(dot.y)===half:Math.abs(dot.x)+Math.abs(dot.y)===half;
-      const selected=style==='all'||(style==='center'&&dot.x===0&&dot.y===0)||(style==='tips'&&isTip)||(style==='scattered'&&random()<.34);
-      dotColors.set(key,selected);
-    }
     // A colored kolam dot covers four times the area of a plain flour dot.
     // Scale the grain count with area so the larger red/yellow mark stays as
     // full and powder-dense as the white marks around it.
@@ -121,8 +121,11 @@ export function createFlour(path){
     for(const [x,y] of corners){
       // Start flourishes just beyond the corner loop so they grow out of it,
       // instead of appearing as a separate mark far away from the kolam.
-      const angle=Math.atan2(y,x),rootX=x+Math.cos(angle)*(path.radius+.04),rootY=y+Math.sin(angle)*(path.radius+.04);
-      for(const stroke of flourishStrokes(rootX,rootY,angle,flourish))drawLength=addStrokeGrains(grains,stroke,random,drawLength);
+      const angle=Math.atan2(y,x),rootX=x+Math.cos(angle)*(path.radius+.08),rootY=y+Math.sin(angle)*(path.radius+.08);
+      for(const rawStroke of flourishStrokes(rootX,rootY,angle,flourish)){
+        const stroke=flourish==='leaf'?keepPetalOutsideDot(rawStroke,{x,y},path.radius):rawStroke;
+        drawLength=addStrokeGrains(grains,stroke,random,drawLength);
+      }
     }
   }
   const extentMargin=flourish==='corner-petal'?2.4:flourish?3:1;

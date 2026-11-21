@@ -1,5 +1,5 @@
-import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-easter-eggs';
-import {createEasterEgg} from './easter-eggs.js?v=20261121-easter-eggs';
+import {randomFromSeed,accentsForSeed} from './random.js?v=20261121-pixel-trace-6';
+import {createEasterEgg} from './easter-eggs.js?v=20261121-pixel-trace-6';
 const TAU=Math.PI*2,opening=Math.PI/4-.055;
 
 // X crossing, D uncrossed join, B unjoined loops. This selects a single-strand
@@ -104,7 +104,13 @@ function cornerPetalArc(dot,radius,startAngle,endAngle,outward,length=.66){
   const tangentA={x:-Math.sin(a),y:Math.cos(a)},tangentB={x:-Math.sin(b),y:Math.cos(b)},tipHandle=.24;
   const left=bezierPoints(start,{x:start.x+tangentA.x*.20,y:start.y+tangentA.y*.20},{x:tip.x-side.x*tipHandle,y:tip.y-side.y*tipHandle},tip);
   const right=bezierPoints(tip,{x:tip.x-side.x*tipHandle,y:tip.y-side.y*tipHandle},{x:end.x-tangentB.x*.20,y:end.y-tangentB.y*.20},end);
-  const points=[...left,...right.slice(1)];
+  const points=[...left,...right.slice(1)].map((point,index,array)=>{
+    if(index===0||index===array.length-1)return point;
+    const dx=point.x-dot.x,dy=point.y-dot.y,distance=Math.hypot(dx,dy),minimum=radius+.035;
+    if(distance>=minimum)return point;
+    const angle=Math.atan2(dy,dx);
+    return {x:dot.x+Math.cos(angle)*minimum,y:dot.y+Math.sin(angle)*minimum};
+  });
   return reverse?points.reverse():points;
 }
 export function pointAt(path,distance){

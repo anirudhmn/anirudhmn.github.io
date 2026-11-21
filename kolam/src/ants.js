@@ -1,10 +1,10 @@
-import {randomFromSeed} from './random.js?v=20261121-easter-eggs';
-import {collectFlour,cellAt} from './flour.js?v=20261121-easter-eggs';
+import {randomFromSeed} from './random.js?v=20261121-pixel-trace-6';
+import {collectFlour,cellAt} from './flour.js?v=20261121-pixel-trace-6';
 const trailSize=80,capacity=90;
 const turn=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 function trailCell(world,x,y){const col=Math.floor((x/world.extent+.5)*trailSize),row=Math.floor((y/world.extent+.5)*trailSize);return col<0||row<0||col>=trailSize||row>=trailSize?-1:row*trailSize+col;}
 export function createAnts(seed,extent){
-  const random=randomFromSeed(`${seed}:ants`),nest={x:-extent*.44,y:extent*.26};
+  const random=randomFromSeed(`${seed}:ants`),nest={x:-extent*.49,y:extent*.20};
   const ants=Array.from({length:28},(_,i)=>({x:nest.x,y:nest.y,angle:-.55+random()*1.8,mode:'resting',rest:i*2.15+random()*1.8,payload:[],feeding:0,speed:.68+random()*.22,gait:random()*6.28,wandering:0,scale:.88+random()*.32}));
   return {ants,nest,extent,random,trail:new Float32Array(trailSize**2),delivered:0,discoveries:0,time:0};
 }
@@ -14,7 +14,7 @@ export function stepAnts(world,flour,dt){
   for(const ant of world.ants){
     if(ant.mode==='resting'){
       ant.rest-=dt;if(ant.rest>0)continue;
-      ant.mode='searching';ant.angle=-.55+(world.random()-.5)*1.9;
+      ant.mode='searching';ant.angle=(ant.entryAngle??-.55)+(world.random()-.5)*1.2;ant.entryAngle=undefined;
     }
     if(ant.mode==='feeding'){
       ant.feeding+=dt;ant.payload.push(...collectFlour(flour,ant.x,ant.y,.048,Math.min(capacity-ant.payload.length,Math.ceil(130*dt))));
@@ -38,7 +38,7 @@ export function stepAnts(world,flour,dt){
     }
     const speed=ant.speed*(ant.mode==='returning'?.82:1);
     ant.x+=Math.cos(ant.angle)*speed*dt;ant.y+=Math.sin(ant.angle)*speed*dt;ant.gait+=dt*20;
-    const bound=world.extent*.47;
+    const bound=world.extent*.95;
     if(Math.abs(ant.x)>bound||Math.abs(ant.y)>bound){ant.x=Math.max(-bound,Math.min(bound,ant.x));ant.y=Math.max(-bound,Math.min(bound,ant.y));ant.angle=Math.atan2(-ant.y,-ant.x)+(world.random()-.5);}
   }
 }

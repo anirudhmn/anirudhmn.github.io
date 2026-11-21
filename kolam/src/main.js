@@ -1,4 +1,4 @@
-import {mountKolam} from './playback.js?v=20261121-easter-eggs';
+import {mountKolam} from './playback.js?v=20261121-pixel-trace-6';
 
 const canvas=document.querySelector('canvas');
 const menu=document.querySelector('#menu');
